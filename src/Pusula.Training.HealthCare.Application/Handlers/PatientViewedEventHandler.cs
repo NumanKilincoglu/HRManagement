@@ -1,16 +1,14 @@
 ﻿using Microsoft.Extensions.Logging;
-using Pusula.Training.HealthCare.Patients;
 using System.Threading.Tasks;
 using Volo.Abp.DependencyInjection;
 using Volo.Abp.EventBus.Distributed;
 
 namespace Pusula.Training.HealthCare.Handlers;
 
-public class PatientViewedEventHandler(ILogger<PatientViewedEventHandler> logger) : IDistributedEventHandler<PatientViewedEto>, ITransientDependency
+public class PatientViewedEventHandler()
 {
-    public Task HandleEventAsync(PatientViewedEto eventData)
+    public Task HandleEventAsync()
     {
-        logger.LogInformation($" -----> HANDLER -> Patient {eventData.Id} viewed as {eventData.ViewedAt.ToLongTimeString()}.");
 
         return Task.CompletedTask;
     }

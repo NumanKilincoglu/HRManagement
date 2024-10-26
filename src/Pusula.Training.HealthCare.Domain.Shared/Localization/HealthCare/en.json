@@ -19,7 +19,8 @@
     "SeeAllUsers": "See all Users",
     "TakePhoto": "Take photo",
     "ChoosePhoto": "Choose pshoto",
-    "Permission:Patients": "Patients",
+    
+    "Permission:Employees": "Employees",
     "Permission:HealthCare": "Health Care",
     "Permission:Create": "Create",
     "Permission:Edit": "Edit",
@@ -32,7 +33,7 @@
     "MobilePhoneNumber": "Mobile Phone Number",
     "HomePhoneNumber": "Home Phone Number",
     "Gender": "Gender",
-    "Patients": "Patients",
+    "Employees": "Employees",
     "MinBirthDate": "Min Birth Date",
     "MinGender": "Min Gender",
     "MaxBirthDate": "Max Birth Date",
@@ -57,9 +58,9 @@
     "DownloadSelectedFile": "Download selected file",
     "RemoveSelectedFile": "Remove selected file",
     "FileUploading": "File uploading...",
-    "Menu:Patients": "Patients",
+    "Menu:Employees": "Employees",
     "Menu:HealthCare": "Health Care",
-    "Patient": "Patient",
+    "Employee": "Employee",
     "Permission:Protocols": "Protocols",
     "Type": "Type",
     "StartTime": "Start Time",
@@ -76,6 +77,7 @@
     "Menu:Departments": "Departments",
     "Department": "Department",
     "Permission:Titles": "Titles",
-    "Permission:Doctors": "Doctors"
+    "Permission:Doctors": "Doctors",
+    "Permission:Dashboard": "Dashboard"
   }
 }

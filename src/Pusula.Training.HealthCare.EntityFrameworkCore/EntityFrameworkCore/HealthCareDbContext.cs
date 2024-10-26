@@ -1,9 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Pusula.Training.HealthCare.Departments;
-using Pusula.Training.HealthCare.Doctors;
-using Pusula.Training.HealthCare.Patients;
-using Pusula.Training.HealthCare.Protocols;
-using Pusula.Training.HealthCare.Titles;
+using Pusula.Training.HealthCare.Employees;
 using Volo.Abp.AuditLogging.EntityFrameworkCore;
 using Volo.Abp.BackgroundJobs.EntityFrameworkCore;
 using Volo.Abp.Data;
@@ -30,13 +26,11 @@ public class HealthCareDbContext :
     ITenantManagementDbContext
 {
     /* Add DbSet properties for your Aggregate Roots / Entities here. */
-    public DbSet<Department> Departments { get; set; } = null!;
-    public DbSet<Protocol> Protocols { get; set; } = null!;
-    public DbSet<Patient> Patients { get; set; } = null!;
-    public DbSet<Title> Titles { get; set; } = null!;
-    public DbSet<Doctor> Doctors { get; set; } = null!;
 
     #region Entities from the modules
+
+    public DbSet<Employee> Employees { get; set; } = null!;
+    public DbSet<Leave> Leaves { get; set; } = null!;
 
     /* Notice: We only implemented IIdentityDbContext and ITenantManagementDbContext
      * and replaced them for this DbContext. This allows you to perform JOIN
@@ -57,7 +51,9 @@ public class HealthCareDbContext :
     public DbSet<IdentitySecurityLog> SecurityLogs { get; set; }
     public DbSet<IdentityLinkUser> LinkUsers { get; set; }
     public DbSet<IdentityUserDelegation> UserDelegations { get; set; }
+
     public DbSet<IdentitySession> Sessions { get; set; }
+
     // Tenant Management
     public DbSet<Tenant> Tenants { get; set; }
     public DbSet<TenantConnectionString> TenantConnectionStrings { get; set; }
@@ -67,7 +63,6 @@ public class HealthCareDbContext :
     public HealthCareDbContext(DbContextOptions<HealthCareDbContext> options)
         : base(options)
     {
-
     }
 
     protected override void OnModelCreating(ModelBuilder builder)
@@ -88,64 +83,21 @@ public class HealthCareDbContext :
         /* Configure your own tables/entities inside here */
         if (builder.IsHostDatabase())
         {
-            builder.Entity<Patient>(b =>
+            builder.Entity<Employee>(b =>
             {
-                b.ToTable(HealthCareConsts.DbTablePrefix + "Patients", HealthCareConsts.DbSchema);
+                b.ToTable(HealthCareConsts.DbTablePrefix + "Employees", HealthCareConsts.DbSchema);
                 b.ConfigureByConvention();
-                b.Property(x => x.FirstName).HasColumnName(nameof(Patient.FirstName)).IsRequired().HasMaxLength(PatientConsts.FirstNameMaxLength);
-                b.Property(x => x.LastName).HasColumnName(nameof(Patient.LastName)).IsRequired().HasMaxLength(PatientConsts.LastNameMaxLength);
-                b.Property(x => x.BirthDate).HasColumnName(nameof(Patient.BirthDate));
-                b.Property(x => x.IdentityNumber).HasColumnName(nameof(Patient.IdentityNumber)).IsRequired().HasMaxLength(PatientConsts.IdentityNumberMaxLength);
-                b.Property(x => x.EmailAddress).HasColumnName(nameof(Patient.EmailAddress)).IsRequired().HasMaxLength(PatientConsts.EmailAddressMaxLength);
-                b.Property(x => x.MobilePhoneNumber).HasColumnName(nameof(Patient.MobilePhoneNumber)).IsRequired().HasMaxLength(PatientConsts.MobilePhoneNumberMaxLength);
-                b.Property(x => x.HomePhoneNumber).HasColumnName(nameof(Patient.HomePhoneNumber));
-                b.Property(x => x.Gender).HasColumnName(nameof(Patient.Gender)).IsRequired().HasMaxLength(PatientConsts.GenderMaxLength);
             });
 
-            builder.Entity<Department>(b =>
+            builder.Entity<Leave>(b =>
             {
-                b.ToTable(HealthCareConsts.DbTablePrefix + "Departments", HealthCareConsts.DbSchema);
+                b.ToTable(HealthCareConsts.DbTablePrefix + "Leaves", HealthCareConsts.DbSchema);
                 b.ConfigureByConvention();
-                b.Property(x => x.Name).HasColumnName(nameof(Department.Name)).IsRequired().HasMaxLength(DepartmentConsts.NameMaxLength);
-            });
-
-            builder.Entity<Protocol>(b =>
-            {
-                b.ToTable(HealthCareConsts.DbTablePrefix + "Protocols", HealthCareConsts.DbSchema);
-                b.ConfigureByConvention();
-                b.Property(x => x.Type).HasColumnName(nameof(Protocol.Type)).IsRequired().HasMaxLength(ProtocolConsts.TypeMaxLength);
-                b.Property(x => x.StartTime).HasColumnName(nameof(Protocol.StartTime));
-                b.Property(x => x.EndTime).HasColumnName(nameof(Protocol.EndTime));
-                b.HasOne<Patient>().WithMany().IsRequired().HasForeignKey(x => x.PatientId).OnDelete(DeleteBehavior.NoAction);
-                b.HasOne<Department>().WithMany().IsRequired().HasForeignKey(x => x.DepartmentId).OnDelete(DeleteBehavior.NoAction);
-            });
-
-            builder.Entity<Title>(b =>
-            {
-                b.ToTable(HealthCareConsts.DbTablePrefix + "Titles", HealthCareConsts.DbSchema);
-                b.ConfigureByConvention();
-                b.Property(x => x.Name).HasColumnName(nameof(Title.Name)).IsRequired().HasMaxLength(TitleConsts.NameMaxLength);
-            });
-
-            builder.Entity<Doctor>(b =>
-            {
-                b.ToTable(HealthCareConsts.DbTablePrefix + "Doctors", HealthCareConsts.DbSchema);
-                b.ConfigureByConvention();
-                b.Property(x => x.FirstName).HasColumnName(nameof(Doctor.FirstName)).IsRequired().HasMaxLength(DoctorConsts.FirstNameMaxLength);
-                b.Property(x => x.LastName).HasColumnName(nameof(Doctor.LastName)).IsRequired().HasMaxLength(DoctorConsts.LastNameMaxLength);
-                b.Property(x => x.PhoneNumber).HasColumnName(nameof(Doctor.PhoneNumber)).IsRequired().HasMaxLength(DoctorConsts.PhoneNumberMaxLength);
-                b.Property(x => x.BirthDate).HasColumnName(nameof(Doctor.BirthDate)).IsRequired();
-                b.Property(x => x.Gender).HasColumnName(nameof(Doctor.Gender));
-                b.HasOne<Department>().WithMany().IsRequired().HasForeignKey(x => x.DepartmentId).OnDelete(DeleteBehavior.NoAction);
-                b.HasOne<Title>().WithMany().IsRequired().HasForeignKey(x => x.TitleId).OnDelete(DeleteBehavior.NoAction);
+                
+                b.HasOne<Employee>()
+                    .WithMany()
+                    .HasForeignKey(l => l.EmployeeId);
             });
         }
-
-        //builder.Entity<YourEntity>(b =>
-        //{
-        //    b.ToTable(HealthCareConsts.DbTablePrefix + "YourEntities", HealthCareConsts.DbSchema);
-        //    b.ConfigureByConvention(); //auto configure for the base class props
-        //    //...
-        //});
     }
 }

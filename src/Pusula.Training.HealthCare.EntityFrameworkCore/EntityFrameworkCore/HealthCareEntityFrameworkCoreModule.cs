@@ -1,5 +1,6 @@
 ﻿using System;
 using Microsoft.Extensions.DependencyInjection;
+using Pusula.Training.HealthCare.Employees;
 using Volo.Abp.Uow;
 using Volo.Abp.AuditLogging.EntityFrameworkCore;
 using Volo.Abp.BackgroundJobs.EntityFrameworkCore;
@@ -12,12 +13,6 @@ using Volo.Abp.OpenIddict.EntityFrameworkCore;
 using Volo.Abp.PermissionManagement.EntityFrameworkCore;
 using Volo.Abp.SettingManagement.EntityFrameworkCore;
 using Volo.Abp.TenantManagement.EntityFrameworkCore;
-using Pusula.Training.HealthCare.Patients;
-using Pusula.Training.HealthCare.Protocols;
-using Pusula.Training.HealthCare.Departments;
-using Pusula.Training.HealthCare.Titles;
-using Pusula.Training.HealthCare.Doctors;
-
 namespace Pusula.Training.HealthCare.EntityFrameworkCore;
 
 [DependsOn(
@@ -50,11 +45,8 @@ public class HealthCareEntityFrameworkCoreModule : AbpModule
              * default repositories only for aggregate roots */
             options.AddDefaultRepositories(includeAllEntities: true);
 
-            options.AddRepository<Patient, EfCorePatientRepository>();
-            options.AddRepository<Protocol, EfCoreProtocolRepository>();
-            options.AddRepository<Department, EfCoreDepartmentRepository>();
-            options.AddRepository<Title, EfCoreTitleRepository>();
-            options.AddRepository<Doctor, EfCoreDoctorRepository>();
+            options.AddRepository<Employee, EfCoreEmployeeRepository>();
+            
         });
 
         Configure<AbpDbContextOptions>(options =>

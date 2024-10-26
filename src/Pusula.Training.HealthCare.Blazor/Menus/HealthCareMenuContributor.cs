@@ -43,29 +43,11 @@ public class HealthCareMenuContributor : IMenuContributor
 
         context.Menu.AddItem(
             new ApplicationMenuItem(
-                HealthCareMenus.Patients,
-                l["Menu:Patients"],
-                url: "/patients",
+                HealthCareMenus.Employees,
+                l["Menu:Employees"],
+                url: "/employees",
                 icon: "fa fa-file-alt",
-                requiredPermissionName: HealthCarePermissions.Patients.Default)
-        );
-
-        context.Menu.AddItem(
-            new ApplicationMenuItem(
-                HealthCareMenus.Protocols,
-                l["Menu:Protocols"],
-                url: "/protocols",
-                icon: "fa fa-file-alt",
-                requiredPermissionName: HealthCarePermissions.Protocols.Default)
-        );
-
-        context.Menu.AddItem(
-            new ApplicationMenuItem(
-                HealthCareMenus.Departments,
-                l["Menu:Departments"],
-                url: "/departments",
-                icon: "fa fa-file-alt",
-                requiredPermissionName: HealthCarePermissions.Departments.Default)
+                requiredPermissionName: HealthCarePermissions.Employees.Default)
         );
 
         return Task.CompletedTask;
