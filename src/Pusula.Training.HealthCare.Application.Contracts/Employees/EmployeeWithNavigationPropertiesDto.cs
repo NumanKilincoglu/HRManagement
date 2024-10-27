@@ -1,4 +1,4 @@
-﻿using Pusula.Training.HealthCare.Employees;
+﻿using Pusula.Training.HealthCare.Leaves;
 
 namespace Pusula.Training.HealthCare.Employees
 {

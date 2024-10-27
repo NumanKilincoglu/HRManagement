@@ -22,6 +22,10 @@ public class HealthCarePermissionDefinitionProvider : PermissionDefinitionProvid
         employeePermission.AddChild(HealthCarePermissions.Employees.Edit, L("Permission:Edit"));
         employeePermission.AddChild(HealthCarePermissions.Employees.Delete, L("Permission:Delete"));
 
+        var leavePermission = myGroup.AddPermission(HealthCarePermissions.Leaves.Default, L("Permission:Leaves"));
+        leavePermission.AddChild(HealthCarePermissions.Leaves.Create, L("Permission:Create"));
+        leavePermission.AddChild(HealthCarePermissions.Leaves.Edit, L("Permission:Edit"));
+        leavePermission.AddChild(HealthCarePermissions.Leaves.Delete, L("Permission:Delete"));
     }
 
     private static LocalizableString L(string name)

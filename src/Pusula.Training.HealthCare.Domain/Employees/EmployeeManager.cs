@@ -20,8 +20,8 @@ public class EmployeeManager(IEmployeeRepository employeeRepository) : DomainSer
         Check.NotNullOrWhiteSpace(emailAddress, nameof(emailAddress));
         Check.Length(emailAddress, nameof(emailAddress), EmployeeConsts.EmailAddressMaxLength, 0);
         Check.NotNull(birthDate, nameof(birthDate));
-        Check.Range((int)gender, nameof(gender), 1, 2);
-        Check.Range(salary, nameof(gender), 0, double.MaxValue);
+        Check.Range((int)gender, nameof(gender), EmployeeConsts.GenderMinLength, EmployeeConsts.GenderMaxLength);
+        Check.Range(salary, nameof(salary), 0, double.MaxValue);
 
         var employee = new Employee(
             GuidGenerator.Create(), firstName, lastName, birthDate, identityNumber, emailAddress, phoneNumber, gender,

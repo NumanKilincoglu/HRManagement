@@ -21,7 +21,7 @@ public partial class Employees
     protected List<Volo.Abp.BlazoriseUI.BreadcrumbItem> BreadcrumbItems = [];
     protected PageToolbar Toolbar { get; } = new PageToolbar();
     protected bool ShowAdvancedFilters { get; set; }
-    private IReadOnlyList<EmployeeWithNavigationPropertiesDto> EmployeeList { get; set; }
+    private IReadOnlyList<EmployeeDto> EmployeeList { get; set; }
     private int PageSize { get; } = LimitedResultRequestDto.DefaultMaxResultCount;
     private int CurrentPage { get; set; } = 1;
     private string CurrentSorting { get; set; } = string.Empty;
@@ -43,7 +43,7 @@ public partial class Employees
 
 
 
-    private List<EmployeeWithNavigationPropertiesDto> SelectedEmployees { get; set; } = [];
+    private List<EmployeeDto> SelectedEmployees { get; set; } = [];
     private bool AllEmployeesSelected { get; set; }
 
     public Employees()
@@ -57,8 +57,7 @@ public partial class Employees
             Sorting = CurrentSorting
         };
         EmployeeList = [];
-
-
+        
     }
 
     protected override async Task OnInitializedAsync()
@@ -124,6 +123,12 @@ public partial class Employees
         await GetEmployeesAsync();
         await InvokeAsync(StateHasChanged);
     }
+    
+    private void NavigateToEmployeeLeaves(Guid employeeId)
+    {
+         NavigationManager.NavigateTo($"/employee/{employeeId}/leaves");
+    }
+
 
     private async Task DownloadAsExcelAsync()
     {
@@ -135,10 +140,10 @@ public partial class Employees
             culture = "&culture=" + culture;
         }
         await RemoteServiceConfigurationProvider.GetConfigurationOrDefaultOrNullAsync("Default");
-        NavigationManager.NavigateTo($"{remoteService?.BaseUrl.EnsureEndsWith('/') ?? string.Empty}api/app/departments/as-excel-file?DownloadToken={token}&FilterText={HttpUtility.UrlEncode(Filter.FilterText)}{culture}&Name={HttpUtility.UrlEncode(Filter.FirstName)}", forceLoad: true);
+        NavigationManager.NavigateTo($"{remoteService?.BaseUrl.EnsureEndsWith('/') ?? string.Empty}api/app/employees/as-excel-file?DownloadToken={token}&FilterText={HttpUtility.UrlEncode(Filter.FilterText)}{culture}&Name={HttpUtility.UrlEncode(Filter.FirstName)}", forceLoad: true);
     }
 
-    private async Task OnDataGridReadAsync(DataGridReadDataEventArgs<EmployeeWithNavigationPropertiesDto> e)
+    private async Task OnDataGridReadAsync(DataGridReadDataEventArgs<EmployeeDto> e)
     {
         CurrentSorting = e.Columns
             .Where(c => c.SortDirection != SortDirection.Default)
@@ -153,7 +158,7 @@ public partial class Employees
     {
         NewEmployee = new EmployeeCreateDto()
         {
-
+            BirthDate = DateTime.Now,
 
         };
 
@@ -177,8 +182,7 @@ public partial class Employees
     private async Task OpenEditEmployeeModalAsync(EmployeeDto input)
     {
         SelectedEditTab = "employee-edit-tab";
-
-
+        
         var employee = await EmployeesAppService.GetAsync(input.Id);
 
         EditingEmployeeId = employee.Id;
@@ -198,6 +202,9 @@ public partial class Employees
     {
         try
         {
+            
+            Console.WriteLine(NewEmployee);
+            
             if (await NewEmployeeValidations.ValidateAll() == false)
             {
                 return;
@@ -212,7 +219,7 @@ public partial class Employees
             await HandleErrorAsync(ex);
         }
     }
-
+    
     private async Task CloseEditEmployeeModalAsync()
     {
         await EditEmployeeModal.Hide();
@@ -294,7 +301,7 @@ public partial class Employees
         }
         else
         {
-            await EmployeesAppService.DeleteByIdsAsync(SelectedEmployees.Select(x => x.Employee.Id).ToList());
+            await EmployeesAppService.DeleteByIdsAsync(SelectedEmployees.Select(x => x.Id).ToList());
         }
 
         SelectedEmployees.Clear();

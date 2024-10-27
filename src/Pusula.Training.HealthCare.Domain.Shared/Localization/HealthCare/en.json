@@ -78,6 +78,11 @@
     "Department": "Department",
     "Permission:Titles": "Titles",
     "Permission:Doctors": "Doctors",
-    "Permission:Dashboard": "Dashboard"
+    "Permission:Dashboard": "Dashboard",
+    "Permission:Leaves": "Leaves",
+    "NewEmployee": "New Employee",
+    "Salary": "Salary",
+    "ShowUserLeaves": "Show User Leaves",
+    "Leaves": "Employee Leaves"
   }
 }

@@ -11,7 +11,7 @@ namespace Pusula.Training.HealthCare.Employees
 {
     public interface IEmployeesAppService : IApplicationService
     {
-        Task<PagedResultDto<EmployeeWithNavigationPropertiesDto>> GetListAsync(GetEmployeesInput input);
+        Task<PagedResultDto<EmployeeDto>> GetListAsync(GetEmployeesInput input);
 
         Task<EmployeeWithNavigationPropertiesDto> GetWithNavigationPropertiesAsync(Guid id);
 

@@ -1,0 +1,37 @@
+@page "/employee/{employeeId:guid}/leaves"
+
+@attribute [Authorize(HealthCarePermissions.Leaves.Default)]
+
+@using Pusula.Training.HealthCare.Leaves
+@inherits HealthCareComponentBase
+@inject ILeavesAppService leavesAppService;
+@inject IUiMessageService UiMessageService
+@inject AbpBlazorMessageLocalizerHelper<HealthCareResource> LH
+@inject IRemoteServiceConfigurationProvider RemoteServiceConfigurationProvider
+@inject NavigationManager NavigationManager
+
+
+@* ************************* PAGE HEADER ************************* *@
+<PageHeader Title="@L["Leaves"]">
+
+</PageHeader>
+
+<p>Employee ID: @EmployeeId</p>
+
+@if (LeavesList == null)
+{
+    <p>Loading leaves...</p>
+}
+else if (LeavesList.Any())
+{
+    <ul>
+        @foreach (var leave in LeavesList)
+        {
+            <li>@leave.LeaveType - @leave.StartDate.ToShortDateString() to @leave.EndDate.ToShortDateString()</li>
+        }
+    </ul>
+}
+else
+{
+    <p>No leaves found for this employee.</p>
+}

@@ -29,11 +29,11 @@ public class EmployeeCreateDto
     public string HomePhoneNumber { get; set; } = null!;
     
     [Required]
-    [StringLength(EmployeeConsts.SalaryMaxLength, MinimumLength = EmployeeConsts.SalaryMinLength)]
     public double Salary { get; set; } = 0.0!;
     
     [Required]
     public DateTime BirthDate { get; set; }
+
     public EnumGender Gender { get; set; }
     
 }

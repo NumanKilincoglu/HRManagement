@@ -61,7 +61,7 @@ public class Employee : FullAuditedAggregateRoot<Guid>
         Check.Length(emailAddress, nameof(emailAddress), EmployeeConsts.EmailAddressMaxLength, 0);
         Check.NotNull(mobilePhoneNumber, nameof(mobilePhoneNumber));
         Check.Length(mobilePhoneNumber, nameof(mobilePhoneNumber), EmployeeConsts.MobilePhoneNumberMaxLength, 0);
-        Check.Range((int)gender, nameof(gender), 1, 2);
+        Check.Range((int)gender, nameof(gender), EmployeeConsts.GenderMinLength, EmployeeConsts.GenderMaxLength);
         
         FirstName = firstName;
         LastName = lastName;

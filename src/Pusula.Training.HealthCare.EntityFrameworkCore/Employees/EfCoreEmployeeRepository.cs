@@ -41,13 +41,12 @@ public class EfCoreEmployeeRepository(IDbContextProvider<HealthCareDbContext> db
             .FirstOrDefault()!;
     }
 
-    public async Task<long> GetCountAsync(string? filterText = null, string? firstName = null, string? lastName = null,
+    public virtual async Task<long> GetCountAsync(string? filterText = null, string? firstName = null, string? lastName = null,
         string? phoneNumber = null, DateTime? birthDateMin = null, DateTime? birthDateMax = null, EnumGender? gender = null,
-        string? sorting = null, int maxResultCount = Int32.MaxValue, int skipCount = 0,
+        string? sorting = null, int maxResultCount = int.MaxValue, int skipCount = 0,
         CancellationToken cancellationToken = default)
     {
-        var query = await GetQueryForNavigationPropertiesAsync();
-        query = ApplyFilter(query, filterText, firstName, lastName, phoneNumber, birthDateMin, birthDateMax, gender);
+        var query = ApplyFilter((await GetDbSetAsync()), filterText, firstName, lastName, phoneNumber, birthDateMin, birthDateMax, gender);
         return await query.LongCountAsync(GetCancellationToken(cancellationToken));
     }
 
@@ -85,9 +84,9 @@ public class EfCoreEmployeeRepository(IDbContextProvider<HealthCareDbContext> db
         int skipCount = 0,
         CancellationToken cancellationToken = default)
     {
-        var query = ApplyFilter(await GetQueryableAsync(), filterText, firstName, lastName, phoneNumber, birthDateMin, birthDateMax, gender);
+        var query = ApplyFilter((await GetQueryableAsync()), filterText, firstName, lastName, phoneNumber, birthDateMin, birthDateMax, gender);
         query = query.OrderBy(string.IsNullOrWhiteSpace(sorting) ? EmployeeConsts.GetDefaultSorting(false) : sorting);
-        return await query.Page(skipCount, maxResultCount).ToListAsync(cancellationToken);
+        return await query.PageBy(skipCount, maxResultCount).ToListAsync(cancellationToken);
     }
 
     #region ApplyFilter and Queryable
@@ -109,8 +108,7 @@ public class EfCoreEmployeeRepository(IDbContextProvider<HealthCareDbContext> db
             .WhereIf(!string.IsNullOrWhiteSpace(lastName), e => e.LastName!.Contains(lastName!))
             .WhereIf(!string.IsNullOrWhiteSpace(phoneNumber), e => e.MobilePhoneNumber!.Contains(phoneNumber!))
             .WhereIf(birthDateMin.HasValue, e => e.BirthDate >= birthDateMin!.Value)
-            .WhereIf(birthDateMax.HasValue, e => e.BirthDate <= birthDateMax!.Value)
-            .WhereIf(gender.HasValue, e => e.Gender == gender);
+            .WhereIf(birthDateMax.HasValue, e => e.BirthDate <= birthDateMax!.Value);
 
     protected virtual async Task<IQueryable<EmployeeWithNavigationProperties>> GetQueryForNavigationPropertiesAsync() =>
         from employee in (await GetDbSetAsync())

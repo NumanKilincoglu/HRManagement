@@ -2,7 +2,7 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using Volo.Abp.Application.Dtos;
 
-namespace Pusula.Training.HealthCare.Employees;
+namespace Pusula.Training.HealthCare.Leaves;
 
 public class LeaveDto : FullAuditedEntityDto<Guid>
 {
