@@ -11,12 +11,14 @@ public interface ILeavesAppService : IApplicationService
 {
     Task<LeaveDto> CreateAsync(LeaveCreateDto input);
 
-    Task<LeaveDto> UpdateAsync(LeaveUpdateDto input);
+    Task<LeaveDto> UpdateAsync(Guid id, LeaveUpdateDto input);
     
     Task<PagedResultDto<LeaveDto>> GetListAsync(GetLeavesInput input);
     
     Task<LeaveDto> GetAsync(Guid id);
 
     Task DeleteAsync(Guid leaveId);
-    
+
+    Task DeleteByIdsAsync(List<Guid> ids);
+
 }

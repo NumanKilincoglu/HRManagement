@@ -2,36 +2,282 @@
 
 @attribute [Authorize(HealthCarePermissions.Leaves.Default)]
 
+@using Pusula.Training.HealthCare.Blazor.Services
+@using Pusula.Training.HealthCare.Employees
 @using Pusula.Training.HealthCare.Leaves
 @inherits HealthCareComponentBase
-@inject ILeavesAppService leavesAppService;
+@inject ILeavesAppService LeavesAppService;
+@inject IEmployeesAppService EmployeesAppService;
 @inject IUiMessageService UiMessageService
 @inject AbpBlazorMessageLocalizerHelper<HealthCareResource> LH
 @inject IRemoteServiceConfigurationProvider RemoteServiceConfigurationProvider
 @inject NavigationManager NavigationManager
-
+@inject AppStateService AppState
 
 @* ************************* PAGE HEADER ************************* *@
-<PageHeader Title="@L["Leaves"]">
+<PageHeader Title="@L["Leaves"]" BreadcrumbItems="BreadcrumbItems" Toolbar="Toolbar">
 
 </PageHeader>
 
-<p>Employee ID: @EmployeeId</p>
-
-@if (LeavesList == null)
-{
-    <p>Loading leaves...</p>
-}
-else if (LeavesList.Any())
-{
-    <ul>
-        @foreach (var leave in LeavesList)
+@* ************************* Employee Deatails ************************* *@
+<Card>
+    <CardBody>
+        @if (Employee != null)
         {
-            <li>@leave.LeaveType - @leave.StartDate.ToShortDateString() to @leave.EndDate.ToShortDateString()</li>
+            <h5>Employee Details</h5>
+            <p>@L["Name"]: @Employee.FirstName</p>
+            <p>@L["LastName"]: @Employee.LastName</p>
+            <p>@L["BirthDate"]: @Employee.BirthDate</p>
         }
-    </ul>
-}
-else
-{
-    <p>No leaves found for this employee.</p>
-}
+
+    </CardBody>
+</Card>
+
+@* ************************* DATA GRID ************************* *@
+<Card>
+    <CardBody>
+        @if (SelectedLeaves.Any())
+        {
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                @if (AllLeavesSelected)
+                {
+                    <p class="lead mb-0">
+                        @L["AllItemsAreSelected", TotalCount]
+                    </p>
+                }
+                else
+                {
+                    <p class="lead mb-0">
+                        @if (SelectedLeaves.Count > 1)
+                        {
+                            @L["NumberOfItemsOnThisPageAreSelected", SelectedLeaves.Count]
+                        }
+                        else
+                        {
+                            @L["OneItemOnThisPageIsSelected"]
+                        }
+                    </p>
+                }
+
+                <div>
+                    @if ((SelectedLeaves.Count == PageSize || SelectedLeaves.Count == LeavesList.Count) && TotalCount > SelectedLeaves.Count)
+                    {
+                        if (!AllLeavesSelected)
+                        {
+                            <Button Clicked="SelectAllItems" Class="mx-1 btn-outline-secondary">@L["SelectAllItems", TotalCount]</Button>
+                        }
+                        else
+                        {
+                            <Button Clicked="ClearSelection" Class="mx-1 btn-outline-secondary">@L["ClearSelection"]</Button>
+                        }
+                    }
+
+                    <Button Color="Color.Danger" Class="mx-1" Size="Size.Medium" Clicked="DeleteSelectedLeavesAsync">
+                        <Icon Name="@IconName.Delete"/> @L["Delete"]
+                    </Button>
+                </div>
+            </div>
+
+            <hr class="my-1 mx-0"/>
+        }
+        <DataGrid TItem="LeaveDto"
+                  Data="LeavesList"
+                  SelectionMode="DataGridSelectionMode.Multiple"
+                  SelectedRows="SelectedLeaves"
+                  RowSelectable="@((args) => CanDeleteLeave)"
+                  SelectedRowsChanged="SelectedLeaveRowsChanged"
+                  ReadData="OnDataGridReadAsync"
+                  TotalItems="TotalCount"
+                  ShowPager="true"
+                  Responsive="true"
+                  PageSize="PageSize"
+                  Class="datagrid-detail">
+            <LoadingTemplate>
+                <Row Class="w-100 align-items-center" Style="height: 150px;">
+                    <Column>
+                        <RadarSpinner/>
+                    </Column>
+                </Row>
+            </LoadingTemplate>
+            <EmptyTemplate>
+                <Row Class="w-100 align-items-center" Style="height: 150px;">
+                    <Column>
+                        <Heading Size="HeadingSize.Is4" TextAlignment="TextAlignment.Center">@L["NoDataAvailable"]</Heading>
+                    </Column>
+                </Row>
+            </EmptyTemplate>
+            <DataGridColumns>
+
+                @if (CanDeleteLeave && LeavesList.Any())
+                {
+                    <DataGridMultiSelectColumn TItem="LeaveDto" DisplayOrder="-1" Width="30px"></DataGridMultiSelectColumn>
+                }
+
+                <DataGridEntityActionsColumn TItem="LeaveDto" @ref="@EntityActionsColumn">
+                    <DisplayTemplate>
+                        <EntityActions TItem="LeaveDto" EntityActionsColumn="@EntityActionsColumn">
+                            <EntityAction TItem="LeaveDto"
+                                          Visible="@CanEditLeave"
+                                          Clicked="async () => await OpenEditLeaveModalAsync(context)"
+                                          Text="@L["Edit"]">
+                            </EntityAction>
+
+                            <EntityAction TItem="LeaveDto"
+                                          Visible="@CanDeleteLeave"
+                                          Clicked="() => DeleteLeaveAsync(context)"
+                                          ConfirmationMessage="@(() => L["DeleteConfirmationMessage"])"
+                                          Text="@L["Delete"]">
+                            </EntityAction>
+
+                        </EntityActions>
+                    </DisplayTemplate>
+                </DataGridEntityActionsColumn>
+
+
+                <DataGridColumn TItem="LeaveDto"
+                                Field="StartDate"
+                                Caption="@L["LeaveStartDate"]">
+                    <DisplayTemplate>
+                        @context.StartDate.ToShortDateString()
+                    </DisplayTemplate>
+                </DataGridColumn>
+                <DataGridColumn TItem="LeaveDto"
+                                Field="EndDate"
+                                Caption="@L["LeaveEndDate"]">
+                    <DisplayTemplate>
+                        @context.EndDate.ToShortDateString()
+                    </DisplayTemplate>
+                </DataGridColumn>
+
+                <DataGridColumn TItem="LeaveDto"
+                                Field="LeaveType"
+                                Caption="@L["LeaveStatus"]">
+                </DataGridColumn>
+
+                <DataGridColumn TItem="LeaveDto"
+                                Field="Status"
+                                Caption="@L["LeaveStatus"]">
+                </DataGridColumn>
+            </DataGridColumns>
+        </DataGrid>
+    </CardBody>
+</Card>
+
+@* ************************* CREATE MODAL ************************* *@
+<Modal @ref="CreateLeaveModal" Closing="@CreateLeaveModal.CancelClosingModalWhenFocusLost">
+    <ModalContent Centered="true">
+        <Form id="CreateLeaveForm">
+            <ModalHeader>
+                <ModalTitle>@L["NewLeave"]</ModalTitle>
+                <CloseButton Clicked="CloseCreateLeaveModalAsync"/>
+            </ModalHeader>
+            <ModalBody>
+                <Validations @ref="@NewLeaveValidations"
+                             Mode="ValidationMode.Auto"
+                             Model="@NewLeave"
+                             ValidateOnLoad="false">
+
+                    <Validation MessageLocalizer="@LH.Localize">
+                        <Field>
+                            <FieldLabel>@L["LeaveType"] *</FieldLabel>
+                            <TextEdit @bind-Text="@NewLeave.LeaveType">
+                                <Feedback>
+                                    <ValidationError/>
+                                </Feedback>
+                            </TextEdit>
+                        </Field>
+                    </Validation>
+
+                    <Validation MessageLocalizer="@LH.Localize">
+                        <Field>
+                            <FieldLabel>@L["StartDate"]</FieldLabel>
+                            <DateEdit TValue="DateTime" InputMode="DateInputMode.Date" @bind-Date="@NewLeave.StartDate">
+                                <Feedback>
+                                    <ValidationError/>
+                                </Feedback>
+                            </DateEdit>
+                        </Field>
+                    </Validation>
+
+                    <Validation MessageLocalizer="@LH.Localize">
+                        <Field>
+                            <FieldLabel>@L["EndDate"]</FieldLabel>
+                            <DateEdit TValue="DateTime" InputMode="DateInputMode.Date" @bind-Date="@NewLeave.EndDate">
+                                <Feedback>
+                                    <ValidationError/>
+                                </Feedback>
+                            </DateEdit>
+                        </Field>
+                    </Validation>
+
+                </Validations>
+            </ModalBody>
+            <ModalFooter>
+                <Button Color="Color.Secondary" Clicked="CloseCreateLeaveModalAsync">
+                    @L["Cancel"]
+                </Button>
+                <SubmitButton Form="CreateLeaveForm" Clicked="CreateLeaveAsync"/>
+            </ModalFooter>
+        </Form>
+    </ModalContent>
+</Modal>
+
+@* ************************* EDIT MODAL ************************* *@
+<Modal @ref="EditLeaveModal" Closing="@EditLeaveModal.CancelClosingModalWhenFocusLost">
+    <ModalContent Centered="true">
+        <Form id="EditELeaveForm">
+            <ModalHeader>
+                <ModalTitle>@L["Update"]</ModalTitle>
+                <CloseButton Clicked="CloseEditEmployeeModalAsync"/>
+            </ModalHeader>
+            <ModalBody>
+                <Validations @ref="@EditingLeaveValidations"
+                             Mode="ValidationMode.Auto"
+                             Model="@EditingLeave"
+                             ValidateOnLoad="false">
+
+                    <Validation MessageLocalizer="@LH.Localize">
+                        <Field>
+                            <FieldLabel>@L["LeaveStatus"] *</FieldLabel>
+                            <TextEdit @bind-Text="@EditingLeave.Status">
+                                <Feedback>
+                                    <ValidationError/>
+                                </Feedback>
+                            </TextEdit>
+                        </Field>
+                    </Validation>
+
+                    <Validation MessageLocalizer="@LH.Localize">
+                        <Field>
+                            <FieldLabel>@L["StartDate"]</FieldLabel>
+                            <DateEdit TValue="DateTime" InputMode="DateInputMode.Date" @bind-Date="@EditingLeave.StartDate">
+                                <Feedback>
+                                    <ValidationError/>
+                                </Feedback>
+                            </DateEdit>
+                        </Field>
+                    </Validation>
+
+                    <Validation MessageLocalizer="@LH.Localize">
+                        <Field>
+                            <FieldLabel>@L["EndDate"]</FieldLabel>
+                            <DateEdit TValue="DateTime" InputMode="DateInputMode.Date" @bind-Date="@EditingLeave.EndDate">
+                                <Feedback>
+                                    <ValidationError/>
+                                </Feedback>
+                            </DateEdit>
+                        </Field>
+                    </Validation>
+
+                </Validations>
+            </ModalBody>
+            <ModalFooter>
+                <Button Color="Color.Secondary"
+                        Clicked="CloseEditEmployeeModalAsync">
+                    @L["Cancel"]
+                </Button>
+                <SubmitButton Form="EditLeaveForm" Clicked="UpdateEmployeeAsync"/>
+            </ModalFooter>
+        </Form>
+    </ModalContent>
+</Modal>

@@ -100,8 +100,6 @@ public partial class Employees
                         .IsGrantedAsync(HealthCarePermissions.Employees.Edit);
         CanDeleteEmployee = await AuthorizationService
                         .IsGrantedAsync(HealthCarePermissions.Employees.Delete);
-
-
     }
 
     private async Task GetEmployeesAsync()
@@ -124,9 +122,10 @@ public partial class Employees
         await InvokeAsync(StateHasChanged);
     }
     
-    private void NavigateToEmployeeLeaves(Guid employeeId)
+    private void NavigateToEmployeeLeaves(EmployeeDto employee)
     {
-         NavigationManager.NavigateTo($"/employee/{employeeId}/leaves");
+         AppState.SetSelectedEmployee(employee);
+         NavigationManager.NavigateTo($"/employee/{employee.Id}/leaves");
     }
 
 

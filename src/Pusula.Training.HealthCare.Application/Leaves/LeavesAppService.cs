@@ -12,17 +12,23 @@ namespace Pusula.Training.HealthCare.Leaves;
 
 [RemoteService(IsEnabled = false)]
 [Authorize(HealthCarePermissions.Leaves.Default)]
-
 public class LeavesAppService(
     ILeaveRepository leaveRepository,
     LeaveManager leaveManager,
     IDistributedCache<LeavesDownloadTokenCacheItem, string> downloadTokenCache
 ) : HealthCareAppService, ILeavesAppService
 {
-    public Task<LeaveDto> UpdateAsync(LeaveUpdateDto input)
-    {
-        throw new NotImplementedException();
-    }
+    [Authorize(HealthCarePermissions.Leaves.Edit)]
+    public async Task<LeaveDto> UpdateAsync(Guid id, LeaveUpdateDto input) =>
+        ObjectMapper.Map<Leave, LeaveDto>(
+            await leaveManager.UpdateAsync(
+                id,
+                input.EmployeeId,
+                input.StartDate,
+                input.EndDate,
+                input.LeaveType,
+                input.Status)
+        );
 
     public async Task<PagedResultDto<LeaveDto>> GetListAsync(GetLeavesInput input)
     {
@@ -49,29 +55,22 @@ public class LeavesAppService(
         };
     }
 
-    public Task<LeaveDto> GetAsync(Guid id)
-    {
-        throw new NotImplementedException();
-    }
+    public async Task<LeaveDto> GetAsync(Guid id) =>
+        ObjectMapper.Map<Leave, LeaveDto>(await leaveRepository.GetAsync(id));
 
-    public Task CreateAsync(LeaveCreateDto input)
-    {
-        throw new NotImplementedException();
-    }
+    [Authorize(HealthCarePermissions.Leaves.Create)]
+    public async Task<LeaveDto> CreateAsync(LeaveCreateDto input) =>
+        ObjectMapper.Map<Leave, LeaveDto>(await leaveManager.CreateAsync(
+            input.EmployeeId,
+            input.StartDate,
+            input.EndDate,
+            input.Status,
+            input.LeaveType));
 
-    Task<LeaveDto> ILeavesAppService.CreateAsync(LeaveCreateDto input)
-    {
-        throw new NotImplementedException();
-    }
-    
+    [Authorize(HealthCarePermissions.Leaves.Delete)]
+    public async Task DeleteAsync(Guid leaveId) =>
+        await leaveRepository.DeleteAsync(leaveId);
 
-    public Task<LeaveDto> GetByIdAsync(Guid leaveId)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task DeleteAsync(Guid leaveId)
-    {
-        return null;
-    }
+    [Authorize(HealthCarePermissions.Leaves.Delete)]
+    public async Task DeleteByIdsAsync(List<Guid> ids) => await leaveRepository.DeleteManyAsync(ids);
 }

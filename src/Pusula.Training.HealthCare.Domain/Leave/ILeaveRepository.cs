@@ -4,7 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Volo.Abp.Domain.Repositories;
 
-namespace Pusula.Training.HealthCare.Employees;
+namespace Pusula.Training.HealthCare.Leaves;
 
 public interface ILeaveRepository : IRepository<Leave, Guid>
 {
@@ -17,6 +17,12 @@ public interface ILeaveRepository : IRepository<Leave, Guid>
         string? sorting = null,
         int maxResultCount = int.MaxValue,
         int skipCount = 0,
+        CancellationToken cancellationToken = default);
+    
+    Task<Leave?> GetEmployeeLeaveAsync(
+        Guid EmployeeId,
+        DateTime startDate,
+        DateTime endDate,
         CancellationToken cancellationToken = default);
 
     Task<long> GetCountAsync(

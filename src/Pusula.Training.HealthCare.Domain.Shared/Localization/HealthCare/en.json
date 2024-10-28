@@ -83,6 +83,11 @@
     "NewEmployee": "New Employee",
     "Salary": "Salary",
     "ShowUserLeaves": "Show User Leaves",
-    "Leaves": "Employee Leaves"
+    "Leaves": "Employee Leaves",
+    "LeaveStartDate" : "Start Date",
+    "LeaveEndDate" : "End Date",
+    "LeaveStatus": "Status",
+    "LeaveType": "Type",
+    "NewLeave": "New Leave"
   }
 }

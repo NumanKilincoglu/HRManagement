@@ -3,7 +3,7 @@ using JetBrains.Annotations;
 using Volo.Abp;
 using Volo.Abp.Domain.Entities.Auditing;
 
-namespace Pusula.Training.HealthCare.Employees;
+namespace Pusula.Training.HealthCare.Leaves;
 
 public class Leave : FullAuditedAggregateRoot<Guid>
 {

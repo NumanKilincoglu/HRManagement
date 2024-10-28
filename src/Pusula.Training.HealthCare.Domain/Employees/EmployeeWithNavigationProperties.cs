@@ -1,3 +1,5 @@
+using Pusula.Training.HealthCare.Leaves;
+
 namespace Pusula.Training.HealthCare.Employees;
 
 public class EmployeeWithNavigationProperties

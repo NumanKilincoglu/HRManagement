@@ -2,6 +2,8 @@
 
 @attribute [Authorize(HealthCarePermissions.Employees.Default)]
 
+@using Polly
+@using Pusula.Training.HealthCare.Blazor.Services
 @using Pusula.Training.HealthCare.Employees
 @inherits HealthCareComponentBase
 @inject IEmployeesAppService EmployeesAppService
@@ -10,6 +12,7 @@
 @inject AbpBlazorMessageLocalizerHelper<HealthCareResource> LH
 @inject IRemoteServiceConfigurationProvider RemoteServiceConfigurationProvider
 @inject NavigationManager NavigationManager
+@inject AppStateService AppState
 
 @* ************************* PAGE HEADER ************************* *@
 <PageHeader Title="@L["Employees"]" BreadcrumbItems="BreadcrumbItems" Toolbar="Toolbar">
@@ -50,12 +53,8 @@
                     </Field>
                 </Column>
             </Row>
-@*//<suite-custom-code-block-2>*@
-@*//</suite-custom-code-block-2>*@
         </div>
-
-@*//<suite-custom-code-block-3>*@
-@*//</suite-custom-code-block-3>*@
+        
     </CardBody>
 </Card>
 
@@ -150,7 +149,7 @@
                             
                             <EntityAction TItem="EmployeeDto"
                                           Visible="@CanEditEmployee"
-                                          Clicked="() => NavigateToEmployeeLeaves(context.Id)"
+                                          Clicked="() => NavigateToEmployeeLeaves(context)"
                                           Text="@L["ShowUserLeaves"]">
                             </EntityAction>
                             
@@ -164,6 +163,12 @@
                         </EntityActions>
                     </DisplayTemplate>
                 </DataGridEntityActionsColumn>
+
+                <DataGridColumn TItem="EmployeeDto" Caption="@L["ShowUserLeaves"]">
+                    <DisplayTemplate>
+                        <Button Color="Color.Primary" Clicked="() => NavigateToEmployeeLeaves(context)">Show</Button>
+                    </DisplayTemplate>
+                </DataGridColumn>
                
                 <DataGridColumn TItem="EmployeeDto"
                                 Field="FirstName"

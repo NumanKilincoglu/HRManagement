@@ -64,7 +64,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Pages\" />
+    <Folder Include="Models\" />
   </ItemGroup>
 
 </Project>

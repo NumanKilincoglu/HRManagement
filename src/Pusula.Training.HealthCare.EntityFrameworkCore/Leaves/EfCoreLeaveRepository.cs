@@ -16,7 +16,14 @@ namespace Pusula.Training.HealthCare.Leaves;
 public class EfCoreLeaveRepository(IDbContextProvider<HealthCareDbContext> dbContextProvider)
     :  EfCoreRepository<HealthCareDbContext, Leave, Guid>(dbContextProvider), ILeaveRepository
 {
-    
+
+    public async Task<Leave?> GetEmployeeLeaveAsync(Guid employeeId, DateTime startDate, DateTime endDate,
+        CancellationToken cancellationToken = default)
+    {
+        var query = ApplyFilter((await GetQueryableAsync()), startDate, endDate, employeeId);
+        return await query.FirstOrDefaultAsync(cancellationToken);
+    }
+
     public virtual async Task<long> GetCountAsync(Guid EmployeeId,
         DateTime? startDate,
         DateTime? endDate,
@@ -70,7 +77,14 @@ public class EfCoreLeaveRepository(IDbContextProvider<HealthCareDbContext> dbCon
             .WhereIf(endDate.HasValue, e => e.EndDate <= endDate!.Value)
             .Where(e => e.EmployeeId == employeeId);
 
-    
+    protected virtual IQueryable<Leave> ApplyFilter(
+        IQueryable<Leave> query,
+        DateTime startDate,
+        DateTime endDate,
+        Guid employeeId) =>
+        query
+            .Where(e => e.StartDate >= startDate && e.EndDate <= endDate)
+            .Where(e => e.EmployeeId == employeeId);
     #endregion
     
 }
