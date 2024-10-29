@@ -9,12 +9,12 @@ using Volo.Abp.Uow;
 
 namespace Pusula.Training.HealthCare.Workers;
 
-public class PeriodicPatientViewerWorker : AsyncPeriodicBackgroundWorkerBase
+public class PeriodicLeaveViewerWorker : AsyncPeriodicBackgroundWorkerBase
 {
-    public PeriodicPatientViewerWorker(AbpAsyncTimer timer, IServiceScopeFactory serviceScopeFactory) 
+    public PeriodicLeaveViewerWorker(AbpAsyncTimer timer, IServiceScopeFactory serviceScopeFactory) 
         : base( timer, serviceScopeFactory)
     {
-        Timer.Period = 100000;
+        Timer.Period = 60000;
     }
 
     [UnitOfWork]
@@ -22,6 +22,6 @@ public class PeriodicPatientViewerWorker : AsyncPeriodicBackgroundWorkerBase
         PeriodicBackgroundWorkerContext workerContext)
     {
 
-        Logger.LogInformation("Completed: PeriodicPatientViewerWorker...");
+        Logger.LogInformation("Completed: PeriodicLeaveViewerWorker...");
     }
 }

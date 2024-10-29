@@ -17,7 +17,7 @@ public class EfCoreEmployeeRepository(IDbContextProvider<HealthCareDbContext> db
 {
 
     public async  Task DeleteAllAsync(string? filterText = null, string? firstName = null, string? lastName = null,
-        string? phoneNumber = null, DateTime? birthDateMin = null, DateTime? birthDateMax = null, EnumGender? gender = null,
+        string? phoneNumber = null, DateTime? birthDateMin = null, DateTime? birthDateMax = null, int? gender = null,
         CancellationToken cancellationToken = default)
     {
         var query = await GetQueryForNavigationPropertiesAsync();
@@ -43,7 +43,7 @@ public class EfCoreEmployeeRepository(IDbContextProvider<HealthCareDbContext> db
     }
 
     public virtual async Task<long> GetCountAsync(string? filterText = null, string? firstName = null, string? lastName = null,
-        string? phoneNumber = null, DateTime? birthDateMin = null, DateTime? birthDateMax = null, EnumGender? gender = null,
+        string? phoneNumber = null, DateTime? birthDateMin = null, DateTime? birthDateMax = null, int? gender = null,
         string? sorting = null, int maxResultCount = int.MaxValue, int skipCount = 0,
         CancellationToken cancellationToken = default)
     {
@@ -58,7 +58,7 @@ public class EfCoreEmployeeRepository(IDbContextProvider<HealthCareDbContext> db
         string? phoneNumber = null,
         DateTime? birthDateMin = null,
         DateTime? birthDateMax = null,
-        EnumGender? gender = null,
+        int? gender = null,
         string? sorting = null,
         int maxResultCount = int.MaxValue,
         int skipCount = 0,
@@ -67,8 +67,6 @@ public class EfCoreEmployeeRepository(IDbContextProvider<HealthCareDbContext> db
         var query = await GetQueryForNavigationPropertiesAsync();
         query = ApplyFilter(query, filterText, firstName, lastName, phoneNumber, birthDateMin, birthDateMax, gender);
         query = query.OrderBy(string.IsNullOrWhiteSpace(sorting) ? EmployeeConsts.GetDefaultSorting(true) : sorting);
-        
-        
         return await query.PageBy(skipCount, maxResultCount).ToListAsync(cancellationToken);
     }
 
@@ -79,7 +77,7 @@ public class EfCoreEmployeeRepository(IDbContextProvider<HealthCareDbContext> db
         string? phoneNumber = null,
         DateTime? birthDateMin = null,
         DateTime? birthDateMax = null,
-        EnumGender? gender = null,
+        int? gender = null,
         string? sorting = null,
         int maxResultCount = int.MaxValue,
         int skipCount = 0,
@@ -100,7 +98,7 @@ public class EfCoreEmployeeRepository(IDbContextProvider<HealthCareDbContext> db
         string? phoneNumber = null,
         DateTime? birthDateMin = null,
         DateTime? birthDateMax = null,
-        EnumGender? gender = null) =>
+        int? gender = null) =>
         query
             .WhereIf(!string.IsNullOrWhiteSpace(filterText),
                 e => e.FirstName!.Contains(filterText!) || e.LastName!.Contains(filterText!) ||
@@ -121,7 +119,6 @@ public class EfCoreEmployeeRepository(IDbContextProvider<HealthCareDbContext> db
             Leave = leave
         };
     
-
     protected virtual IQueryable<EmployeeWithNavigationProperties> ApplyFilter(
         IQueryable<EmployeeWithNavigationProperties> query,
         string? filterText = null,
@@ -130,7 +127,7 @@ public class EfCoreEmployeeRepository(IDbContextProvider<HealthCareDbContext> db
         string? phoneNumber = null,
         DateTime? birthDateMin = null,
         DateTime? birthDateMax = null,
-        EnumGender? gender = null) =>
+        int? gender = null) =>
             query
                 .WhereIf(!string.IsNullOrWhiteSpace(filterText), e => e.Employee.FirstName!.Contains(filterText!) || e.Employee.LastName!.Contains(filterText!) || e.Employee.MobilePhoneNumber!.Contains(filterText!))
                 .WhereIf(!string.IsNullOrWhiteSpace(firstName), e => e.Employee.FirstName!.Contains(firstName!))
@@ -138,6 +135,6 @@ public class EfCoreEmployeeRepository(IDbContextProvider<HealthCareDbContext> db
                 .WhereIf(!string.IsNullOrWhiteSpace(phoneNumber), e => e.Employee.MobilePhoneNumber!.Contains(phoneNumber!))
                 .WhereIf(birthDateMin.HasValue, e => e.Employee.BirthDate >= birthDateMin!.Value)
                 .WhereIf(birthDateMax.HasValue, e => e.Employee.BirthDate <= birthDateMax!.Value)
-                .WhereIf(gender.HasValue, e => e.Employee.Gender == gender);
+                .WhereIf(gender.HasValue, e => (int)e.Employee.Gender == gender!.Value);
     #endregion
 }

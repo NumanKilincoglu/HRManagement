@@ -52,6 +52,38 @@
                         <TextEdit Text="@Filter.FirstName" TextChanged="@OnNameChangedAsync" />                       
                     </Field>
                 </Column>
+                <Column ColumnSize="ColumnSize.Is3">
+                    <Field>
+                        <FieldLabel>@L["LastName"]</FieldLabel>
+                        <TextEdit Text="@Filter.LastName" TextChanged="@OnLastNameChangedAsync" />
+                    </Field>
+                </Column>
+                <Column ColumnSize="ColumnSize.Is3">
+                    <Field>
+                        <FieldLabel>@L["MinBirthDate"]</FieldLabel>
+                        <DatePicker TValue="DateTime?"
+                                    InputMode="DateInputMode.Date"
+                                    Date="@Filter.BirthDateMin"
+                                    DateChanged="@OnBirthDateMinChangedAsync"
+                                    Placeholder="@string.Empty" />
+                    </Field>
+                </Column>
+                <Column ColumnSize="ColumnSize.Is3">
+                    <Field>
+                        <FieldLabel>@L["MaxBirthDate"]</FieldLabel>
+                        <DatePicker TValue="DateTime?"
+                                    InputMode="DateInputMode.Date"
+                                    Date="@Filter.BirthDateMax"
+                                    DateChanged="@OnBirthDateMaxChangedAsync"
+                                    Placeholder="@string.Empty" />
+                    </Field>
+                </Column>
+                <Column ColumnSize="ColumnSize.Is3">
+                    <Field>
+                        <FieldLabel>@L["MobilePhoneNumber"]</FieldLabel>
+                        <TextEdit Text="@Filter.PhoneNumber" TextChanged="@OnMobilePhoneNumberChangedAsync" />
+                    </Field>
+                </Column>
             </Row>
         </div>
         
@@ -100,6 +132,7 @@
                     <Button Color="Color.Danger" Class="mx-1" Size="Size.Medium" Clicked="DeleteSelectedEmployeesAsync">
                         <Icon Name="@IconName.Delete" /> @L["Delete"]
                     </Button>
+                    
                 </div>
             </div>
             
@@ -145,12 +178,6 @@
                                           Visible="@CanEditEmployee"
                                           Clicked="async () => await OpenEditEmployeeModalAsync(context)"
                                           Text="@L["Edit"]">
-                            </EntityAction>
-                            
-                            <EntityAction TItem="EmployeeDto"
-                                          Visible="@CanEditEmployee"
-                                          Clicked="() => NavigateToEmployeeLeaves(context)"
-                                          Text="@L["ShowUserLeaves"]">
                             </EntityAction>
                             
                             <EntityAction TItem="EmployeeDto"
@@ -308,15 +335,14 @@
 
                     <Validation MessageLocalizer="@LH.Localize">
                         <Field>
-                            <FieldLabel>@L["Salary"] *</FieldLabel>
-                            <NumericPicker TValue="double" @bind-Value="@NewEmployee.Salary" Min="EmployeeConsts.SalaryMin" Max="EmployeeConsts.SalaryMax" Decimals="0">
+                            <FieldLabel>@L["Gender"] *</FieldLabel>
+                            <NumericPicker TValue="int" @bind-Value="@NewEmployee.Gender" Min="EmployeeConsts.GenderMinLength" Max="EmployeeConsts.GenderMaxLength" Decimals="0">
                                 <Feedback>
                                     <ValidationError />
                                 </Feedback>
                             </NumericPicker>
                         </Field>
                     </Validation>
-
                     
                 </Validations>
             </ModalBody>
@@ -326,8 +352,6 @@
                     @L["Cancel"]
                 </Button>
                 <SubmitButton Form="CreateEmployeeForm" Clicked="CreateEmployeeAsync"/>
-@*//<suite-custom-code-block-6>*@
-@*//</suite-custom-code-block-6>*@
             </ModalFooter>
         </Form>
     </ModalContent>
@@ -426,6 +450,17 @@
                                     <ValidationError />
                                 </Feedback>
                             </TextEdit>
+                        </Field>
+                    </Validation>
+
+                    <Validation MessageLocalizer="@LH.Localize">
+                        <Field>
+                            <FieldLabel>@L["Gender"] *</FieldLabel>
+                            <NumericPicker TValue="int" @bind-Value="@EditingEmployee.Gender" Min="EmployeeConsts.GenderMinLength" Max="EmployeeConsts.GenderMaxLength" Decimals="0">
+                                <Feedback>
+                                    <ValidationError />
+                                </Feedback>
+                            </NumericPicker>
                         </Field>
                     </Validation>
 

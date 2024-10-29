@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Pusula.Training.HealthCare.Leaves;
 using Volo.Abp.Application.Dtos;
 using Volo.Abp.Application.Services;
 
@@ -18,6 +17,8 @@ public interface ILeavesAppService : IApplicationService
     Task<LeaveDto> GetAsync(Guid id);
 
     Task DeleteAsync(Guid leaveId);
+    
+    Task DeleteAllAsync(GetLeavesInput input);
 
     Task DeleteByIdsAsync(List<Guid> ids);
 

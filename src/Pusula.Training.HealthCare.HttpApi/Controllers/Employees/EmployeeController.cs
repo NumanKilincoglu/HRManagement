@@ -54,7 +54,7 @@ namespace Pusula.Training.HealthCare.Controllers.Employees
 
         [HttpDelete]
         [Route("bulk-delete")]
-        public virtual Task DeleteByIdsAsync(List<Guid> doctorIds) => employeesAppService.DeleteByIdsAsync(doctorIds);
+        public virtual Task DeleteByIdsAsync(List<Guid> employeeIds) => employeesAppService.DeleteByIdsAsync(employeeIds);
 
         [HttpDelete]
         [Route("delete-all")]

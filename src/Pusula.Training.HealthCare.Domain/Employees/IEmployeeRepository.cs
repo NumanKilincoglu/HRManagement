@@ -15,7 +15,7 @@ public interface IEmployeeRepository : IRepository<Employee, Guid>
         string? phoneNumber = null,
         DateTime? birthDateMin = null,
         DateTime? birthDateMax = null,
-        EnumGender? gender = null,
+        int? gender = null,
         CancellationToken cancellationToken = default);
 
     Task<EmployeeWithNavigationProperties> GetWithNavigationPropertiesAsync(
@@ -29,7 +29,7 @@ public interface IEmployeeRepository : IRepository<Employee, Guid>
         string? phoneNumber = null,
         DateTime? birthDateMin = null,
         DateTime? birthDateMax = null,
-        EnumGender? gender = null,
+        int? gender = null,
         string? sorting = null,
         int maxResultCount = int.MaxValue,
         int skipCount = 0,
@@ -42,7 +42,7 @@ public interface IEmployeeRepository : IRepository<Employee, Guid>
         string? phoneNumber = null,
         DateTime? birthDateMin = null,
         DateTime? birthDateMax = null,
-        EnumGender? gender = null,
+        int? gender = null,
         string? sorting = null,
         int maxResultCount = int.MaxValue,
         int skipCount = 0,
@@ -55,7 +55,7 @@ public interface IEmployeeRepository : IRepository<Employee, Guid>
         string? phoneNumber = null,
         DateTime? birthDateMin = null,
         DateTime? birthDateMax = null,
-        EnumGender? gender = null,
+        int? gender = null,
         string? sorting = null,
         int maxResultCount = int.MaxValue,
         int skipCount = 0,

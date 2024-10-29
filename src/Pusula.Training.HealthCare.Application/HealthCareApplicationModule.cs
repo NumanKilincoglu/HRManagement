@@ -42,7 +42,7 @@ public class HealthCareApplicationModule : AbpModule
 {
     public override async Task OnApplicationInitializationAsync(ApplicationInitializationContext context)
     {
-        await context.AddBackgroundWorkerAsync<PeriodicPatientViewerWorker>();
+        await context.AddBackgroundWorkerAsync<PeriodicLeaveViewerWorker>();
     }
 
     public override void ConfigureServices(ServiceConfigurationContext context)

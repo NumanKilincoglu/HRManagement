@@ -12,7 +12,7 @@ namespace Pusula.Training.HealthCare.Employees
         public string? PhoneNumber { get; set; }
         public DateTime? BirthDateMin { get; set; }
         public DateTime? BirthDateMax { get; set; }
-        public EnumGender? Gender { get; set; }
+        public int? Gender { get; set; }
         
         public GetEmployeesInput() { }
     }

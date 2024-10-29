@@ -202,8 +202,6 @@ public partial class Employees
         try
         {
             
-            Console.WriteLine(NewEmployee);
-            
             if (await NewEmployeeValidations.ValidateAll() == false)
             {
                 return;
@@ -228,12 +226,13 @@ public partial class Employees
     {
         try
         {
+            
             if (await EditingEmployeeValidations.ValidateAll() == false)
             {
                 return;
             }
-
-            //await EmployeesAppService.UpdateAsync(EditingEmployeeId, EditingEmployee);
+            
+            await EmployeesAppService.UpdateAsync(EditingEmployee);
             await GetEmployeesAsync();
             await EditEmployeeModal.Hide();
         }
@@ -258,7 +257,29 @@ public partial class Employees
         Filter.FirstName = name;
         await SearchAsync();
     }
-
+    
+    protected virtual async Task OnLastNameChangedAsync(string? lastName)
+    {
+        Filter.LastName = lastName;
+        await SearchAsync();
+    }
+    
+    protected virtual async Task OnBirthDateMinChangedAsync(DateTime? birthDateMin)
+    {
+        Filter.BirthDateMin = birthDateMin.HasValue ? birthDateMin.Value.Date : birthDateMin;
+        await SearchAsync();
+    }
+    protected virtual async Task OnBirthDateMaxChangedAsync(DateTime? birthDateMax)
+    {
+        Filter.BirthDateMax = birthDateMax.HasValue ? birthDateMax.Value.Date.AddDays(1).AddSeconds(-1) : birthDateMax;
+        await SearchAsync();
+    }
+    
+    protected virtual async Task OnMobilePhoneNumberChangedAsync(string? mobilePhoneNumber)
+    {
+        Filter.PhoneNumber = mobilePhoneNumber;
+        await SearchAsync();
+    }
 
     private Task SelectAllItems()
     {
@@ -308,6 +329,4 @@ public partial class Employees
 
         await GetEmployeesAsync();
     }
-
-
 }

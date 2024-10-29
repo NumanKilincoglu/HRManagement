@@ -9,28 +9,28 @@ namespace Pusula.Training.HealthCare.Leaves;
 public interface ILeaveRepository : IRepository<Leave, Guid>
 {
     Task<List<Leave>> GetListAsync(
-        Guid EmployeeId,
+        Guid? employeeId,
         DateTime? startDate,
         DateTime? endDate,
-        string? LeaveType,
-        string? Status,
+        string? laveType,
+        string? status,
         string? sorting = null,
         int maxResultCount = int.MaxValue,
         int skipCount = 0,
         CancellationToken cancellationToken = default);
-    
+
     Task<Leave?> GetEmployeeLeaveAsync(
-        Guid EmployeeId,
+        Guid employeeId,
         DateTime startDate,
         DateTime endDate,
         CancellationToken cancellationToken = default);
 
     Task<long> GetCountAsync(
-        Guid EmployeeId,
+        Guid? employeeId,
         DateTime? startDate,
         DateTime? endDate,
-        string? LeaveType,
-        string? Status,
+        string? leaveType,
+        string? status,
         string? sorting = null,
         int maxResultCount = int.MaxValue,
         int skipCount = 0,
@@ -39,7 +39,7 @@ public interface ILeaveRepository : IRepository<Leave, Guid>
     Task DeleteAllAsync(
         DateTime? startDate,
         DateTime? endDate,
-        string? LeaveType,
-        string? Status,
+        string? leaveType,
+        string? status,
         CancellationToken cancellationToken = default);
 }

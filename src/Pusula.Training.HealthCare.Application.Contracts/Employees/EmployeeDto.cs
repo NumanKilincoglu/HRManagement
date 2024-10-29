@@ -13,9 +13,21 @@ public class EmployeeDto : FullAuditedEntityDto<Guid>
     [Required]
     [StringLength(EmployeeConsts.LastNameMaxLength, MinimumLength = EmployeeConsts.LastNameMinLength)]
     public string LastName { get; set; } = null!;
+    
+    [Required]
+    [StringLength(EmployeeConsts.IdentityNumberMaxLength)]
+    public string IdentityNumber { get; set; } = null!;
+    
+    [Required]
+    [StringLength(EmployeeConsts.EmailAddressMaxLength)]
+    public string EmailAddress { get; set; } = null!;
+    
     [Required]
     [StringLength(EmployeeConsts.PhoneNumberMaxLength)]
     public string MobilePhoneNumber { get; set; } = null!;
+    
+    [StringLength(EmployeeConsts.PhoneNumberMaxLength)]
+    public string HomePhoneNumber { get; set; } = null!;
     
     [Required]
     public string Salary { get; set; } = null!;

@@ -24,41 +24,43 @@ public class EfCoreLeaveRepository(IDbContextProvider<HealthCareDbContext> dbCon
         return await query.FirstOrDefaultAsync(cancellationToken);
     }
 
-    public virtual async Task<long> GetCountAsync(Guid EmployeeId,
+    public virtual async Task<long> GetCountAsync(Guid? employeeId,
         DateTime? startDate,
         DateTime? endDate,
-        string? LeaveType,
-        string? Status,
+        string? leaveType,
+        string? status,
         string? sorting = null,
         int maxResultCount = int.MaxValue,
         int skipCount = 0,
         CancellationToken cancellationToken = default)
     {
-        var query = ApplyFilter((await GetQueryableAsync()), startDate, endDate, LeaveType, Status, EmployeeId);
+        var query = ApplyFilter((await GetQueryableAsync()), startDate, endDate, leaveType, status, employeeId);
         return await query.LongCountAsync(GetCancellationToken(cancellationToken));
     }
 
     public virtual async Task<List<Leave>> GetListAsync(
-        Guid EmployeeId,
+        Guid? employeeId,
         DateTime? startDate,
         DateTime? endDate,
-        string? LeaveType,
-        string? Status,
+        string? leaveType,
+        string? status,
         string? sorting = null,
         int maxResultCount = int.MaxValue,
         int skipCount = 0,
         CancellationToken cancellationToken = default)
     {
-        var query = ApplyFilter((await GetQueryableAsync()), startDate, endDate, LeaveType, Status, EmployeeId);
+        var query = ApplyFilter((await GetQueryableAsync()), startDate, endDate, leaveType, status, employeeId);
         
         query = query.OrderBy(string.IsNullOrWhiteSpace(sorting) ? LeaveConsts.GetDefaultSorting(false) : sorting);
         return await query.PageBy(skipCount, maxResultCount).ToListAsync(cancellationToken);
     }
 
-    public Task DeleteAllAsync(DateTime? startDate, DateTime? endDate, string? LeaveType, string? Status,
+    public async Task DeleteAllAsync(DateTime? startDate, DateTime? endDate, string? leaveType, string? status,
         CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        var query = ApplyFilter((await GetQueryableAsync()), startDate, endDate, leaveType, status, null);
+        var ids = query.Select(x => x.Id).ToList();
+        await DeleteManyAsync(ids, cancellationToken: GetCancellationToken(cancellationToken));
     }
 
     #region ApplyFilter and Queryable
@@ -67,15 +69,15 @@ public class EfCoreLeaveRepository(IDbContextProvider<HealthCareDbContext> dbCon
         IQueryable<Leave> query,
         DateTime? startDate,
         DateTime? endDate,
-        string? LeaveType,
-        string? Status,
-        Guid employeeId) =>
+        string? leaveType,
+        string? status,
+        Guid? employeeId) =>
         query
-            .WhereIf(!string.IsNullOrWhiteSpace(Status), e => e.Status!.Contains(Status!))
-            .WhereIf(!string.IsNullOrWhiteSpace(LeaveType), e => e.LeaveType!.Contains(LeaveType!))
+            .WhereIf(!string.IsNullOrWhiteSpace(status), e => e.Status!.Contains(status!))
+            .WhereIf(!string.IsNullOrWhiteSpace(leaveType), e => e.LeaveType!.Contains(leaveType!))
             .WhereIf(startDate.HasValue, e => e.StartDate >= startDate!.Value)
             .WhereIf(endDate.HasValue, e => e.EndDate <= endDate!.Value)
-            .Where(e => e.EmployeeId == employeeId);
+            .WhereIf(employeeId.HasValue, e=> e.EmployeeId == employeeId);
 
     protected virtual IQueryable<Leave> ApplyFilter(
         IQueryable<Leave> query,

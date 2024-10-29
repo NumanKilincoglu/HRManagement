@@ -16,6 +16,7 @@ public class HealthCareApplicationAutoMapperProfile : Profile
         CreateMap<EmployeeDto, EmployeeUpdateDto>();
         CreateMap<Employee, LookupDto<Guid>>().ForMember(dest => dest.DisplayName, opt => opt.MapFrom(src => src.FirstName));
         CreateMap<EmployeeWithNavigationProperties, EmployeeWithNavigationPropertiesDto>();
+        CreateMap<EmployeeDto, EmployeeCacheItem>();
         
         CreateMap<Leave, LeaveDto>();
         CreateMap<Leave, LeaveUpdateDto>();

@@ -31,7 +31,7 @@ public class Employee : FullAuditedAggregateRoot<Guid>
     public virtual double Salary { get; set; }
     
     [CanBeNull]
-    public virtual EnumGender Gender { get; set; }
+    public virtual int Gender { get; set; }
     
     protected Employee()
     {
@@ -46,8 +46,8 @@ public class Employee : FullAuditedAggregateRoot<Guid>
     public Employee(Guid id, string firstName, 
         string lastName, DateTime birthDate,
         string identityNumber, string emailAddress, 
-        string mobilePhoneNumber, EnumGender gender, 
-        double salary, string? homePhoneNumber = null)
+        string mobilePhoneNumber, int gender, 
+        string? homePhoneNumber = null)
     {
 
         Id = id;
@@ -71,6 +71,6 @@ public class Employee : FullAuditedAggregateRoot<Guid>
         MobilePhoneNumber = mobilePhoneNumber;
         Gender = gender;
         HomePhoneNumber = homePhoneNumber;
-        Salary = salary;
+        Salary = 0.0;
     }
 }

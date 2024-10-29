@@ -1,12 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using AutoMapper.Internal.Mappers;
 using Microsoft.AspNetCore.Authorization;
 using Pusula.Training.HealthCare.Employees;
 using Pusula.Training.HealthCare.Permissions;
 using Volo.Abp;
 using Volo.Abp.Application.Dtos;
 using Volo.Abp.Caching;
+using Volo.Abp.EventBus.Distributed;
 
 namespace Pusula.Training.HealthCare.Leaves;
 
@@ -15,7 +17,8 @@ namespace Pusula.Training.HealthCare.Leaves;
 public class LeavesAppService(
     ILeaveRepository leaveRepository,
     LeaveManager leaveManager,
-    IDistributedCache<LeavesDownloadTokenCacheItem, string> downloadTokenCache
+    IDistributedCache<LeavesDownloadTokenCacheItem, string> downloadTokenCache,
+    IDistributedEventBus distributedEventBus
 ) : HealthCareAppService, ILeavesAppService
 {
     [Authorize(HealthCarePermissions.Leaves.Edit)]
@@ -34,16 +37,16 @@ public class LeavesAppService(
     {
         var items = await leaveRepository.GetListAsync(
             input.EmployeeId,
-            input.startDate,
-            input.endDate,
+            input.StartDate,
+            input.EndDate,
             input.LeaveType,
             input.Status
         );
 
         var count = await leaveRepository.GetCountAsync(
             input.EmployeeId,
-            input.startDate,
-            input.endDate,
+            input.StartDate,
+            input.EndDate,
             input.LeaveType,
             input.Status
         );
@@ -55,8 +58,12 @@ public class LeavesAppService(
         };
     }
 
-    public async Task<LeaveDto> GetAsync(Guid id) =>
-        ObjectMapper.Map<Leave, LeaveDto>(await leaveRepository.GetAsync(id));
+    public async Task<LeaveDto> GetAsync(Guid id)
+    {
+        await distributedEventBus.PublishAsync(new LeaveViewedEto { Id = id, ViewedAt = Clock.Now },
+            onUnitOfWorkComplete: false);
+        return ObjectMapper.Map<Leave, LeaveDto>(await leaveRepository.GetAsync(id));
+    }
 
     [Authorize(HealthCarePermissions.Leaves.Create)]
     public async Task<LeaveDto> CreateAsync(LeaveCreateDto input) =>
@@ -64,13 +71,28 @@ public class LeavesAppService(
             input.EmployeeId,
             input.StartDate,
             input.EndDate,
-            input.Status,
-            input.LeaveType));
+            input.LeaveType,
+            input.Status
+        ));
 
     [Authorize(HealthCarePermissions.Leaves.Delete)]
-    public async Task DeleteAsync(Guid leaveId) =>
+    public async Task DeleteAsync(Guid leaveId)
+    {
+        await distributedEventBus.PublishAsync(new LeaveDeletedEto { Id = leaveId, DeletedAt = Clock.Now },
+            onUnitOfWorkComplete: true);
         await leaveRepository.DeleteAsync(leaveId);
+    }
 
     [Authorize(HealthCarePermissions.Leaves.Delete)]
-    public async Task DeleteByIdsAsync(List<Guid> ids) => await leaveRepository.DeleteManyAsync(ids);
+    public async Task DeleteByIdsAsync(List<Guid> ids) =>
+        await leaveRepository.DeleteManyAsync(ids);
+
+    [Authorize(HealthCarePermissions.Leaves.Delete)]
+    public async Task DeleteAllAsync(GetLeavesInput input) =>
+        await leaveRepository.DeleteAllAsync(
+            input.StartDate,
+            input.EndDate,
+            input.LeaveType,
+            input.Status
+        );
 }

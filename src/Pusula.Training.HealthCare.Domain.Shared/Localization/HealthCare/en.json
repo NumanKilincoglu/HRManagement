@@ -82,12 +82,15 @@
     "Permission:Leaves": "Leaves",
     "NewEmployee": "New Employee",
     "Salary": "Salary",
-    "ShowUserLeaves": "Show User Leaves",
+    "ShowUserLeaves": "Manage User Leaves",
     "Leaves": "Employee Leaves",
     "LeaveStartDate" : "Start Date",
     "LeaveEndDate" : "End Date",
     "LeaveStatus": "Status",
     "LeaveType": "Type",
-    "NewLeave": "New Leave"
+    "NewLeave": "New Leave",
+    "CreateLeave": "Create Leave Request",
+    "Male": "Male",
+    "Female": "Female"
   }
 }

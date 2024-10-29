@@ -10,7 +10,7 @@ public class EmployeeManager(IEmployeeRepository employeeRepository) : DomainSer
     public virtual async Task<Employee> CreateAsync(
         string firstName, string lastName, DateTime birthDate, string identityNumber, string emailAddress,
         string phoneNumber,
-        EnumGender gender, double salary, string? homePhoneNumber = null)
+        int gender, string? homePhoneNumber = null)
     {
         Check.NotNullOrWhiteSpace(firstName, nameof(firstName), EmployeeConsts.FirstNameMaxLength,
             EmployeeConsts.FirstNameMinLength);
@@ -20,12 +20,10 @@ public class EmployeeManager(IEmployeeRepository employeeRepository) : DomainSer
         Check.NotNullOrWhiteSpace(emailAddress, nameof(emailAddress));
         Check.Length(emailAddress, nameof(emailAddress), EmployeeConsts.EmailAddressMaxLength, 0);
         Check.NotNull(birthDate, nameof(birthDate));
-        Check.Range((int)gender, nameof(gender), EmployeeConsts.GenderMinLength, EmployeeConsts.GenderMaxLength);
-        Check.Range(salary, nameof(salary), 0, double.MaxValue);
+        Check.Range(gender, nameof(gender), EmployeeConsts.GenderMinLength, EmployeeConsts.GenderMaxLength);
 
         var employee = new Employee(
-            GuidGenerator.Create(), firstName, lastName, birthDate, identityNumber, emailAddress, phoneNumber, gender,
-            salary
+            GuidGenerator.Create(), firstName, lastName, birthDate, identityNumber, emailAddress, phoneNumber, gender, homePhoneNumber
         );
 
         return await employeeRepository.InsertAsync(employee);
@@ -34,7 +32,7 @@ public class EmployeeManager(IEmployeeRepository employeeRepository) : DomainSer
     public virtual async Task<Employee> UpdateAsync(
         Guid id, string firstName, string lastName, DateTime birthDate, string identityNumber, string emailAddress,
         string mobilePhoneNumber,
-        EnumGender gender, double salary, string? homePhoneNumber = null)
+        int gender, double salary, string? homePhoneNumber = null)
 
     {
         Check.NotNullOrWhiteSpace(firstName, nameof(firstName), EmployeeConsts.FirstNameMaxLength,
@@ -46,7 +44,7 @@ public class EmployeeManager(IEmployeeRepository employeeRepository) : DomainSer
         Check.NotNullOrWhiteSpace(emailAddress, nameof(emailAddress));
         Check.Length(emailAddress, nameof(emailAddress), EmployeeConsts.EmailAddressMaxLength, 0);
         Check.NotNull(birthDate, nameof(birthDate));
-        Check.Range((int)gender, nameof(gender), EmployeeConsts.GenderMinLength, EmployeeConsts.GenderMaxLength);
+        Check.Range(gender, nameof(gender), EmployeeConsts.GenderMinLength, EmployeeConsts.GenderMaxLength);
         Check.Range(salary, nameof(salary), 0, double.MaxValue);
 
         var employee = await employeeRepository.GetAsync(id);
