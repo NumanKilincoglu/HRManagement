@@ -1,13 +1,12 @@
 ﻿using System.Threading.Tasks;
 using Pusula.Training.HealthCare.Employees;
 using Pusula.Training.HealthCare.Leaves;
-using Volo.Abp.Authorization.Permissions;
+using Pusula.Training.HealthCare.Permissions;
 using Volo.Abp.Data;
 using Volo.Abp.DependencyInjection;
 using Volo.Abp.Guids;
 using Volo.Abp.Identity;
 using Volo.Abp.PermissionManagement;
-using Volo.Abp.SettingManagement;
 
 namespace Pusula.Training.HealthCare
 {
@@ -55,22 +54,23 @@ namespace Pusula.Training.HealthCare
                 IsPublic = true,
                 IsDefault = false
             };
-            
+
             await roleManager.CreateAsync(role);
 
-            await permissionManager.SetForRoleAsync(role.Name, "HealthCare.Employees", true);
-            await permissionManager.SetForRoleAsync(role.Name, "HealthCare.Employees.Create", true);
-            await permissionManager.SetForRoleAsync(role.Name, "HealthCare.Employees.Delete", true);
-            
-            await permissionManager.SetForRoleAsync(role.Name, "HealthCare.Leaves", true);
-            await permissionManager.SetForRoleAsync(role.Name, "HealthCare.Leaves.Create", true);
-            await permissionManager.SetForRoleAsync(role.Name, "HealthCare.Leaves.Delete", true);
+            //Employees permissions
+            await permissionManager.SetForRoleAsync(role.Name, HealthCarePermissions.Employees.Default, true);
+            await permissionManager.SetForRoleAsync(role.Name, HealthCarePermissions.Employees.Create, true);
+            await permissionManager.SetForRoleAsync(role.Name, HealthCarePermissions.Employees.Delete, true);
+
+            //Leaves permissions
+            await permissionManager.SetForRoleAsync(role.Name, HealthCarePermissions.Leaves.Default, true);
+            await permissionManager.SetForRoleAsync(role.Name, HealthCarePermissions.Leaves.Create, true);
+            await permissionManager.SetForRoleAsync(role.Name, HealthCarePermissions.Leaves.Delete, true);
 
             var hrUser = new IdentityUser(guidGenerator.Create(), "hr@pusula", "hr@pusula.com", null);
-            
+
             await userManager.CreateAsync(hrUser, "Pusula*hr1", true);
             await userManager.AddToRoleAsync(hrUser, role.Name);
-
         }
     }
 }
