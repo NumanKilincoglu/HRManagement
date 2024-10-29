@@ -8,14 +8,8 @@ public class LeaveConsts
     {
         return string.Format(DefaultSorting, withEntityName ? "Leave." : string.Empty);
     }
-
-    public const int FirstNameMaxLength = 128;
-    public const int LastNameMaxLength = 128;
-    public const int FirstNameMinLength = 2;
-    public const int LastNameMinLength = 2;
-    public const int IdentityNumberMaxLength = 11;
-    public const int EmailAddressMaxLength = 128;
-    public const int MobilePhoneNumberMaxLength = 32;
-
-    
+    public const int LeaveTypeMaxLength = 50;
+    public const int LeaveStatusMaxLength = 50;
+    public const int LeaveTypeMinLength = 2;
+    public const int LeaveStatusMinLength = 2;
 }

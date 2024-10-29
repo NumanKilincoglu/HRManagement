@@ -60,9 +60,8 @@ namespace Pusula.Training.HealthCare.Employees
             {
                 return employee;
             }
-            
-            var employeeDto = ObjectMapper.Map<Employee, EmployeeDto>(await employeeRepository.GetAsync(id));
 
+            var employeeDto = ObjectMapper.Map<Employee, EmployeeDto>(await employeeRepository.GetAsync(id));
             await employeeCache.SetAsync(
                 cacheKey,
                 employeeDto,
@@ -71,7 +70,7 @@ namespace Pusula.Training.HealthCare.Employees
                     AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(200)
                 }
             );
-            
+
             return employeeDto;
         }
 
@@ -111,8 +110,7 @@ namespace Pusula.Training.HealthCare.Employees
                     input.Gender,
                     input.Salary,
                     input.HomePhoneNumber));
-
-
+        
         [AllowAnonymous]
         public async Task<IRemoteStreamContent> GetListAsExcelFileAsync(EmployeeExcelDownloadDto input)
         {

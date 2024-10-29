@@ -34,7 +34,7 @@ public class HealthCareMenuContributor : IMenuContributor
                 order: 0
             )
         );
-        
+
         ConfigureTenantMenu(administration, MultiTenancyConsts.IsEnabled);
 
 
@@ -48,6 +48,15 @@ public class HealthCareMenuContributor : IMenuContributor
                 url: "/employees",
                 icon: "fa fa-file-alt",
                 requiredPermissionName: HealthCarePermissions.Employees.Default)
+        );
+
+        context.Menu.AddItem(
+            new ApplicationMenuItem(
+                HealthCareMenus.Leaves,
+                l["Menu:Leaves"],
+                url: "/leaves",
+                icon: "fa fa-file-alt",
+                requiredPermissionName: HealthCarePermissions.Leaves.Default)
         );
 
         return Task.CompletedTask;

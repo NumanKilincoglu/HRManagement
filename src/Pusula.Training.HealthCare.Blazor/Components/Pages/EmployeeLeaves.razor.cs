@@ -7,6 +7,8 @@ using System.Web;
 using Blazorise;
 using Blazorise.DataGrid;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Components;
+using Pusula.Training.HealthCare.Employees;
 using Pusula.Training.HealthCare.Leaves;
 using Pusula.Training.HealthCare.Permissions;
 using Volo.Abp.Application.Dtos;
@@ -15,12 +17,14 @@ using Volo.Abp.BlazoriseUI.Components;
 
 namespace Pusula.Training.HealthCare.Blazor.Components.Pages;
 
-public partial class Leaves
+public partial class EmployeeLeaves
 {
     protected List<Volo.Abp.BlazoriseUI.BreadcrumbItem> BreadcrumbItems = [];
     protected PageToolbar Toolbar { get; } = new PageToolbar();
     protected bool ShowAdvancedFilters { get; set; }
 
+    [Parameter] public Guid EmployeeId { get; set; }
+    public EmployeeDto Employee { get; set; }
     private GetLeavesInput Filter { get; set; }
 
     private int PageSize { get; } = LimitedResultRequestDto.DefaultMaxResultCount;
@@ -40,7 +44,7 @@ public partial class Leaves
     public Modal CreateLeaveModal { get; set; }
 
     public Modal EditLeaveModal { get; set; }
-    private IReadOnlyList<LeaveDto> LeaveItemList { get; set; }
+    private IReadOnlyList<LeaveDto> LeavesList { get; set; }
 
     private DataGridEntityActionsColumn<LeaveDto> EntityActionsColumn { get; set; } = new();
 
@@ -50,22 +54,24 @@ public partial class Leaves
     private List<LeaveDto> SelectedLeaves { get; set; } = [];
     private bool AllLeavesSelected { get; set; }
 
-    public Leaves()
+    public EmployeeLeaves()
     {
         NewLeave = new LeaveCreateDto();
         EditingLeave = new LeaveUpdateDto();
         Filter = new GetLeavesInput()
         {
+            EmployeeId = EmployeeId,
             MaxResultCount = PageSize,
             SkipCount = (CurrentPage - 1) * PageSize,
             Sorting = CurrentSorting
         };
-        LeaveItemList = [];
+        LeavesList = [];
     }
 
     protected override async Task OnInitializedAsync()
     {
         await SetPermissionsAsync();
+        await HandleEmployeeDetails();
     }
 
     public void Dispose()
@@ -93,8 +99,34 @@ public partial class Leaves
     {
         Toolbar.AddButton(L["ExportToExcel"], DownloadAsExcelAsync, IconName.Download);
 
+        Toolbar.AddButton(L["NewLeave"], OpenCreateLeaveModalAsync, IconName.Add,
+            requiredPolicyName: HealthCarePermissions.Leaves.Create);
+
         return ValueTask.CompletedTask;
     }
+
+    private async Task HandleEmployeeDetails()
+    {
+        if (AppState.SelectedEmployee == null)
+        {
+            Employee = await EmployeesAppService.GetAsync(EmployeeId);
+        }
+        else
+        {
+            Employee = AppState.SelectedEmployee;
+        }
+    }
+
+    private async Task SetPermissionsAsync()
+    {
+        CanCreateLeave = await AuthorizationService
+            .IsGrantedAsync(HealthCarePermissions.Leaves.Create);
+        CanEditLeave = await AuthorizationService
+            .IsGrantedAsync(HealthCarePermissions.Leaves.Edit);
+        CanDeleteLeave = await AuthorizationService
+            .IsGrantedAsync(HealthCarePermissions.Leaves.Delete);
+    }
+
 
     private async Task DownloadAsExcelAsync()
     {
@@ -119,30 +151,16 @@ public partial class Leaves
             $"&StartDate={HttpUtility.UrlEncode(Filter.EndDate.ToString())}",
             forceLoad: true);
     }
-    
-    private void NavigateToEmployeeLeaves(Guid employeeId)
-    {
-        NavigationManager.NavigateTo($"/employee/{employeeId}/leaves");
-    }
-
-    private async Task SetPermissionsAsync()
-    {
-        CanCreateLeave = await AuthorizationService
-            .IsGrantedAsync(HealthCarePermissions.Leaves.Create);
-        CanEditLeave = await AuthorizationService
-            .IsGrantedAsync(HealthCarePermissions.Leaves.Edit);
-        CanDeleteLeave = await AuthorizationService
-            .IsGrantedAsync(HealthCarePermissions.Leaves.Delete);
-    }
 
     private async Task GetLeavesAsync()
     {
         Filter.MaxResultCount = PageSize;
         Filter.SkipCount = (CurrentPage - 1) * PageSize;
         Filter.Sorting = CurrentSorting;
+        Filter.EmployeeId = EmployeeId;
 
         var result = await LeavesAppService.GetListAsync(Filter);
-        LeaveItemList = result.Items;
+        LeavesList = result.Items;
         TotalCount = (int)result.TotalCount;
     }
 
@@ -155,6 +173,48 @@ public partial class Leaves
         CurrentPage = e.Page;
         await GetLeavesAsync();
         await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task OpenCreateLeaveModalAsync()
+    {
+        NewLeave = new LeaveCreateDto()
+        {
+            EmployeeId = EmployeeId,
+            Status = "Approved"
+        };
+
+        SelectedCreateTab = "leave-create-tab";
+        await NewLeaveValidations.ClearAll();
+        await CreateLeaveModal.Show();
+    }
+
+    private async Task CreateLeaveAsync()
+    {
+        try
+        {
+            Console.WriteLine(NewLeave);
+
+            if (await NewLeaveValidations.ValidateAll() == false)
+            {
+                return;
+            }
+
+            await LeavesAppService.CreateAsync(NewLeave);
+            await GetLeavesAsync();
+            await CloseCreateLeaveModalAsync();
+        }
+        catch (Exception ex)
+        {
+            await HandleErrorAsync(ex);
+        }
+    }
+
+    private async Task CloseCreateLeaveModalAsync()
+    {
+        NewLeave = new LeaveCreateDto
+        {
+        };
+        await CreateLeaveModal.Hide();
     }
 
     private async Task OpenEditLeaveModalAsync(LeaveDto input)
@@ -253,29 +313,28 @@ public partial class Leaves
 
         return Task.CompletedTask;
     }
-    
+
     protected virtual async Task OnLeaveTypeChangedAsync(string? type)
     {
         Filter.LeaveType = type;
         await GetLeavesAsync();
     }
-    
+
     protected virtual async Task OnStartDateChangedAsync(DateTime? date)
     {
         Filter.StartDate = date?.Date ?? date;
         await GetLeavesAsync();
     }
-    
+
     protected virtual async Task OnEndDateChangedAsync(DateTime? date)
     {
         Filter.EndDate = date?.Date ?? date;
         await GetLeavesAsync();
     }
-    
+
     protected virtual async Task OnStatusChangedAsync(string? status)
     {
         Filter.Status = status;
         await GetLeavesAsync();
     }
-    
 }

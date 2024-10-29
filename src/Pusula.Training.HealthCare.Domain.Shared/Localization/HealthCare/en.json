@@ -83,7 +83,7 @@
     "NewEmployee": "New Employee",
     "Salary": "Salary",
     "ShowUserLeaves": "Manage User Leaves",
-    "Leaves": "Employee Leaves",
+    "EmployeeLeaves": "Employee Leaves",
     "LeaveStartDate" : "Start Date",
     "LeaveEndDate" : "End Date",
     "LeaveStatus": "Status",
@@ -91,6 +91,8 @@
     "NewLeave": "New Leave",
     "CreateLeave": "Create Leave Request",
     "Male": "Male",
-    "Female": "Female"
+    "Female": "Female",
+    "Menu:Leaves": "Leaves",
+    "Filters": "Filters"
   }
 }

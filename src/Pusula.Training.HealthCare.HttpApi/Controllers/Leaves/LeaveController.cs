@@ -4,8 +4,10 @@ using System.Threading.Tasks;
 using Asp.Versioning;
 using Microsoft.AspNetCore.Mvc;
 using Pusula.Training.HealthCare.Leaves;
+using Pusula.Training.HealthCare.Shared;
 using Volo.Abp;
 using Volo.Abp.Application.Dtos;
+using Volo.Abp.Content;
 
 namespace Pusula.Training.HealthCare.Controllers.Leaves
 {
@@ -38,6 +40,16 @@ namespace Pusula.Training.HealthCare.Controllers.Leaves
         [HttpDelete]
         [Route("bulk-delete")]
         public Task DeleteByIdsAsync(List<Guid> leaveIds) => leavesAppService.DeleteByIdsAsync(leaveIds);
+
+        [HttpGet]
+        [Route("as-excel-file")]
+        public Task<IRemoteStreamContent> GetListAsExcelFileAsync(LeaveExcelDownloadDto input) =>
+            leavesAppService.GetListAsExcelFileAsync(input);
+
+        [HttpGet]
+        [Route("download-token")]
+        public Task<DownloadTokenResultDto> GetDownloadTokenAsync() =>
+            leavesAppService.GetDownloadTokenAsync();
 
         [HttpDelete]
         [Route("delete-all")]

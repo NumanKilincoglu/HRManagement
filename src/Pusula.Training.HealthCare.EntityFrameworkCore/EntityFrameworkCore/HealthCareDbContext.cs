@@ -88,16 +88,38 @@ public class HealthCareDbContext :
             {
                 b.ToTable(HealthCareConsts.DbTablePrefix + "Employees", HealthCareConsts.DbSchema);
                 b.ConfigureByConvention();
+                b.Property(x => x.FirstName).HasColumnName(nameof(Employee.FirstName)).IsRequired()
+                    .HasMaxLength(EmployeeConsts.FirstNameMaxLength);
+                b.Property(x => x.LastName).HasColumnName(nameof(Employee.LastName)).IsRequired()
+                    .HasMaxLength(EmployeeConsts.LastNameMaxLength);
+                b.Property(x => x.BirthDate).HasColumnName(nameof(Employee.BirthDate));
+                b.Property(x => x.IdentityNumber).HasColumnName(nameof(Employee.IdentityNumber)).IsRequired()
+                    .HasMaxLength(EmployeeConsts.IdentityNumberMaxLength);
+                b.Property(x => x.EmailAddress).HasColumnName(nameof(Employee.EmailAddress)).IsRequired()
+                    .HasMaxLength(EmployeeConsts.EmailAddressMaxLength);
+                b.Property(x => x.MobilePhoneNumber).HasColumnName(nameof(Employee.MobilePhoneNumber)).IsRequired()
+                    .HasMaxLength(EmployeeConsts.MobilePhoneNumberMaxLength);
+                b.Property(x => x.HomePhoneNumber).HasColumnName(nameof(Employee.HomePhoneNumber));
+                b.Property(x => x.Gender).HasColumnName(nameof(Employee.Gender)).IsRequired()
+                    .HasMaxLength(EmployeeConsts.GenderMaxLength);
+                b.Property(x => x.Salary).HasColumnName(nameof(Employee.Salary)).IsRequired()
+                    .HasMaxLength(EmployeeConsts.SalaryMaxLength);
             });
 
             builder.Entity<Leave>(b =>
             {
                 b.ToTable(HealthCareConsts.DbTablePrefix + "Leaves", HealthCareConsts.DbSchema);
                 b.ConfigureByConvention();
-                
+                b.Property(x => x.StartDate).HasColumnName(nameof(Leave.StartDate)).IsRequired();
+                b.Property(x => x.EndDate).HasColumnName(nameof(Leave.EndDate)).IsRequired();
+                b.Property(x => x.LeaveType).HasColumnName(nameof(Leave.LeaveType)).IsRequired()
+                    .HasMaxLength(LeaveConsts.LeaveTypeMaxLength);
+                b.Property(x => x.Status).HasColumnName(nameof(Leave.Status)).IsRequired()
+                    .HasMaxLength(LeaveConsts.LeaveStatusMaxLength);
+
                 b.HasOne<Employee>()
                     .WithMany()
-                    .HasForeignKey(l => l.EmployeeId);
+                    .HasForeignKey(l => l.EmployeeId).OnDelete(DeleteBehavior.NoAction);
             });
         }
     }

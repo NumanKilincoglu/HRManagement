@@ -50,7 +50,6 @@ public class EfCoreLeaveRepository(IDbContextProvider<HealthCareDbContext> dbCon
         CancellationToken cancellationToken = default)
     {
         var query = ApplyFilter((await GetQueryableAsync()), startDate, endDate, leaveType, status, employeeId);
-        
         query = query.OrderBy(string.IsNullOrWhiteSpace(sorting) ? LeaveConsts.GetDefaultSorting(false) : sorting);
         return await query.PageBy(skipCount, maxResultCount).ToListAsync(cancellationToken);
     }

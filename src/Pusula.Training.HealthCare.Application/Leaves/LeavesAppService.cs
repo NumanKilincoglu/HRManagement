@@ -1,14 +1,22 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper.Internal.Mappers;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.Caching.Distributed;
+using MiniExcelLibs;
 using Pusula.Training.HealthCare.Employees;
 using Pusula.Training.HealthCare.Permissions;
+using Pusula.Training.HealthCare.Shared;
 using Volo.Abp;
 using Volo.Abp.Application.Dtos;
+using Volo.Abp.Authorization;
 using Volo.Abp.Caching;
+using Volo.Abp.Content;
 using Volo.Abp.EventBus.Distributed;
+using DistributedCacheEntryOptions = Microsoft.Extensions.Caching.Distributed.DistributedCacheEntryOptions;
 
 namespace Pusula.Training.HealthCare.Leaves;
 
@@ -17,7 +25,7 @@ namespace Pusula.Training.HealthCare.Leaves;
 public class LeavesAppService(
     ILeaveRepository leaveRepository,
     LeaveManager leaveManager,
-    IDistributedCache<LeavesDownloadTokenCacheItem, string> downloadTokenCache,
+    IDistributedCache<LeaveDownloadTokenCacheItem, string> downloadTokenCache,
     IDistributedEventBus distributedEventBus
 ) : HealthCareAppService, ILeavesAppService
 {
@@ -40,7 +48,8 @@ public class LeavesAppService(
             input.StartDate,
             input.EndDate,
             input.LeaveType,
-            input.Status
+            input.Status,
+            input.Sorting
         );
 
         var count = await leaveRepository.GetCountAsync(
@@ -86,6 +95,56 @@ public class LeavesAppService(
     [Authorize(HealthCarePermissions.Leaves.Delete)]
     public async Task DeleteByIdsAsync(List<Guid> ids) =>
         await leaveRepository.DeleteManyAsync(ids);
+
+    public async Task<IRemoteStreamContent> GetListAsExcelFileAsync(LeaveExcelDownloadDto input)
+    {
+        var downloadToken = await downloadTokenCache.GetAsync(input.DownloadToken);
+        if (downloadToken == null || input.DownloadToken != downloadToken.Token)
+        {
+            throw new AbpAuthorizationException("Invalid download token: " + input.DownloadToken);
+        }
+
+        var leaves = await leaveRepository.GetListAsync(
+            input.EmployeeId,
+            input.StartDate,
+            input.EndDate,
+            input.LeaveType,
+            input.Status
+        );
+
+        var items = leaves.Select(leave => new LeaveExcelDto()
+        {
+            StartDate = leave.StartDate,
+            EndDate = leave.EndDate,
+            Status = leave.Status,
+            LeaveType = leave.LeaveType,
+        });
+
+        var memoryStream = new MemoryStream();
+        await memoryStream.SaveAsAsync(items);
+        memoryStream.Seek(0, SeekOrigin.Begin);
+
+        return new RemoteStreamContent(memoryStream, "LeaveList.xlsx",
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+    }
+
+    public async Task<DownloadTokenResultDto> GetDownloadTokenAsync()
+    {
+        var token = Guid.NewGuid().ToString("N");
+
+        await downloadTokenCache.SetAsync(
+            token,
+            new LeaveDownloadTokenCacheItem { Token = token },
+            new DistributedCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(200)
+            });
+
+        return new Shared.DownloadTokenResultDto
+        {
+            Token = token
+        };
+    }
 
     [Authorize(HealthCarePermissions.Leaves.Delete)]
     public async Task DeleteAllAsync(GetLeavesInput input) =>

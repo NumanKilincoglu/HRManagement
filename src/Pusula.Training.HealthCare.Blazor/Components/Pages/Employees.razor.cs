@@ -17,7 +17,6 @@ namespace Pusula.Training.HealthCare.Blazor.Components.Pages;
 
 public partial class Employees
 {
-
     protected List<Volo.Abp.BlazoriseUI.BreadcrumbItem> BreadcrumbItems = [];
     protected PageToolbar Toolbar { get; } = new PageToolbar();
     protected bool ShowAdvancedFilters { get; set; }
@@ -42,7 +41,6 @@ public partial class Employees
     protected string SelectedEditTab = "employee-edit-tab";
 
 
-
     private List<EmployeeDto> SelectedEmployees { get; set; } = [];
     private bool AllEmployeesSelected { get; set; }
 
@@ -57,20 +55,17 @@ public partial class Employees
             Sorting = CurrentSorting
         };
         EmployeeList = [];
-        
     }
 
     protected override async Task OnInitializedAsync()
     {
         await SetPermissionsAsync();
-
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
-
             await SetBreadcrumbItemsAsync();
             await SetToolbarItemsAsync();
             await InvokeAsync(StateHasChanged);
@@ -87,7 +82,8 @@ public partial class Employees
     {
         Toolbar.AddButton(L["ExportToExcel"], DownloadAsExcelAsync, IconName.Download);
 
-        Toolbar.AddButton(L["NewEmployee"], OpenCreateEmployeeModalAsync, IconName.Add, requiredPolicyName: HealthCarePermissions.Employees.Create);
+        Toolbar.AddButton(L["NewEmployee"], OpenCreateEmployeeModalAsync, IconName.Add,
+            requiredPolicyName: HealthCarePermissions.Employees.Create);
 
         return ValueTask.CompletedTask;
     }
@@ -97,9 +93,9 @@ public partial class Employees
         CanCreateEmployee = await AuthorizationService
             .IsGrantedAsync(HealthCarePermissions.Employees.Create);
         CanEditEmployee = await AuthorizationService
-                        .IsGrantedAsync(HealthCarePermissions.Employees.Edit);
+            .IsGrantedAsync(HealthCarePermissions.Employees.Edit);
         CanDeleteEmployee = await AuthorizationService
-                        .IsGrantedAsync(HealthCarePermissions.Employees.Delete);
+            .IsGrantedAsync(HealthCarePermissions.Employees.Delete);
     }
 
     private async Task GetEmployeesAsync()
@@ -121,25 +117,35 @@ public partial class Employees
         await GetEmployeesAsync();
         await InvokeAsync(StateHasChanged);
     }
-    
+
     private void NavigateToEmployeeLeaves(EmployeeDto employee)
     {
-         AppState.SetSelectedEmployee(employee);
-         NavigationManager.NavigateTo($"/employee/{employee.Id}/leaves");
+        AppState.SetSelectedEmployee(employee);
+        NavigationManager.NavigateTo($"/employee/{employee.Id}/leaves");
     }
-
 
     private async Task DownloadAsExcelAsync()
     {
         var token = (await EmployeesAppService.GetDownloadTokenAsync()).Token;
-        var remoteService = await RemoteServiceConfigurationProvider.GetConfigurationOrDefaultOrNullAsync("HealthCare") ?? await RemoteServiceConfigurationProvider.GetConfigurationOrDefaultOrNullAsync("Default");
+        var remoteService =
+            await RemoteServiceConfigurationProvider.GetConfigurationOrDefaultOrNullAsync("HealthCare") ??
+            await RemoteServiceConfigurationProvider.GetConfigurationOrDefaultOrNullAsync("Default");
         var culture = CultureInfo.CurrentUICulture.Name ?? CultureInfo.CurrentCulture.Name;
         if (!culture.IsNullOrEmpty())
         {
             culture = "&culture=" + culture;
         }
+
         await RemoteServiceConfigurationProvider.GetConfigurationOrDefaultOrNullAsync("Default");
-        NavigationManager.NavigateTo($"{remoteService?.BaseUrl.EnsureEndsWith('/') ?? string.Empty}api/app/employees/as-excel-file?DownloadToken={token}&FilterText={HttpUtility.UrlEncode(Filter.FilterText)}{culture}&Name={HttpUtility.UrlEncode(Filter.FirstName)}", forceLoad: true);
+        NavigationManager.NavigateTo(
+            $"{remoteService?.BaseUrl.EnsureEndsWith('/') ?? string.Empty}api/app/employees/as-excel-file?" +
+            $"DownloadToken={token}" +
+            $"&FilterText={HttpUtility.UrlEncode(Filter.FilterText)}{culture}" +
+            $"&Name={HttpUtility.UrlEncode(Filter.FirstName)}" +
+            $"&LastName={HttpUtility.UrlEncode(Filter.LastName)}" +
+            $"&BirthDateMin={HttpUtility.UrlEncode(Filter.BirthDateMin.ToString())}" +
+            $"&BirthDateMax={HttpUtility.UrlEncode(Filter.BirthDateMax.ToString())}",
+            forceLoad: true);
     }
 
     private async Task OnDataGridReadAsync(DataGridReadDataEventArgs<EmployeeDto> e)
@@ -158,7 +164,6 @@ public partial class Employees
         NewEmployee = new EmployeeCreateDto()
         {
             BirthDate = DateTime.Now,
-
         };
 
         SelectedCreateTab = "employee-create-tab";
@@ -172,8 +177,6 @@ public partial class Employees
     {
         NewEmployee = new EmployeeCreateDto
         {
-
-
         };
         await CreateEmployeeModal.Hide();
     }
@@ -181,7 +184,7 @@ public partial class Employees
     private async Task OpenEditEmployeeModalAsync(EmployeeDto input)
     {
         SelectedEditTab = "employee-edit-tab";
-        
+
         var employee = await EmployeesAppService.GetAsync(input.Id);
 
         EditingEmployeeId = employee.Id;
@@ -201,7 +204,6 @@ public partial class Employees
     {
         try
         {
-            
             if (await NewEmployeeValidations.ValidateAll() == false)
             {
                 return;
@@ -216,7 +218,7 @@ public partial class Employees
             await HandleErrorAsync(ex);
         }
     }
-    
+
     private async Task CloseEditEmployeeModalAsync()
     {
         await EditEmployeeModal.Hide();
@@ -226,12 +228,11 @@ public partial class Employees
     {
         try
         {
-            
             if (await EditingEmployeeValidations.ValidateAll() == false)
             {
                 return;
             }
-            
+
             await EmployeesAppService.UpdateAsync(EditingEmployee);
             await GetEmployeesAsync();
             await EditEmployeeModal.Hide();
@@ -257,24 +258,25 @@ public partial class Employees
         Filter.FirstName = name;
         await SearchAsync();
     }
-    
+
     protected virtual async Task OnLastNameChangedAsync(string? lastName)
     {
         Filter.LastName = lastName;
         await SearchAsync();
     }
-    
+
     protected virtual async Task OnBirthDateMinChangedAsync(DateTime? birthDateMin)
     {
         Filter.BirthDateMin = birthDateMin.HasValue ? birthDateMin.Value.Date : birthDateMin;
         await SearchAsync();
     }
+
     protected virtual async Task OnBirthDateMaxChangedAsync(DateTime? birthDateMax)
     {
         Filter.BirthDateMax = birthDateMax.HasValue ? birthDateMax.Value.Date.AddDays(1).AddSeconds(-1) : birthDateMax;
         await SearchAsync();
     }
-    
+
     protected virtual async Task OnMobilePhoneNumberChangedAsync(string? mobilePhoneNumber)
     {
         Filter.PhoneNumber = mobilePhoneNumber;
@@ -308,7 +310,9 @@ public partial class Employees
 
     private async Task DeleteSelectedEmployeesAsync()
     {
-        var message = AllEmployeesSelected ? L["DeleteAllRecords"].Value : L["DeleteSelectedRecords", SelectedEmployees.Count].Value;
+        var message = AllEmployeesSelected
+            ? L["DeleteAllRecords"].Value
+            : L["DeleteSelectedRecords", SelectedEmployees.Count].Value;
 
         if (!await UiMessageService.Confirm(message))
         {

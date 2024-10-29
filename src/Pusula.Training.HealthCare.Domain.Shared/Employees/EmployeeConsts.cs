@@ -3,12 +3,13 @@ namespace Pusula.Training.HealthCare.Employees;
 public class EmployeeConsts
 {
     private const string DefaultSorting = "{0}FirstName asc";
+    
 
     public static string GetDefaultSorting(bool withEntityName)
     {
         return string.Format(DefaultSorting, withEntityName ? "Employee." : string.Empty);
     }
-
+    
     public const int FirstNameMaxLength = 128;
     public const int LastNameMaxLength = 128;
     public const int FirstNameMinLength = 2;
